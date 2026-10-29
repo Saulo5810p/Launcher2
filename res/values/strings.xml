@@ -198,7 +198,6 @@ s -->
     <string name="folder_cling_create_folder">To make a new folder on your home screen, stack one app on top of another.</string>
     <!-- The text on the button to dismiss a cling [CHAR_LIMIT=none] -->
     <string name="cling_dismiss">OK</string>
-    <add-resource type="string" name="default_folder_name" />
     <!-- Title of the wallpaper selection dialog [CHAR_LIMIT=40]-->
     <string name="wallpaper_dialog_title">Select wallpaper</string>
     <!-- Text to show when there are no wallpapers [CHAR_LIMIT=40]-->

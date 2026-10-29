@@ -18,6 +18,9 @@ reescrevemos res/ so com os vencedores, sem os qualificadores sw*/xlarge:
   drawable-xlarge-hdpi/x.png             -> drawable-hdpi/x.png (substitui a versao de telefone)
   layout-sw600dp-port/ + -land/ diferentes -> layout-port/ + layout-land/
 
+Tags exclusivas do AOSP (<add-resource>, <java-symbol>, <skip>, <eat-comment>) tambem saem
+de values/: o merger do Gradle recusa essas tags.
+
 O resultado nao depende mais do tamanho do aparelho. Sobra so orientacao e densidade.
 Recursos que so valiam para telas maiores que TARGET_SW (sw720dp) sao descartados.
 
@@ -51,6 +54,10 @@ NS = {
 }
 for _p, _u in NS.items():
     ET.register_namespace(_p, _u)
+
+# Tags do aapt1/AOSP que o merger de recursos do Gradle (AGP) rejeita
+# ("Can't determine type for tag"). Sao so metadados, sem valor: podem sair.
+DROP_TAGS = {"eat-comment", "skip", "add-resource", "java-symbol"}
 
 SIZE_ORDER = {"small": 0, "normal": 1, "large": 2, "xlarge": 3}
 TARGET_SIZE = "xlarge"
@@ -186,7 +193,7 @@ def parse_values_file(path):
         if not isinstance(ch.tag, str):
             continue
         name = ch.get("name")
-        if ch.tag == "eat-comment" or name is None:
+        if ch.tag in DROP_TAGS or name is None:
             pending = []
             continue
         key = (ch.tag, name, ch.get("type") if ch.tag == "item" else None)
