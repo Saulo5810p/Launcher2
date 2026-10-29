@@ -47,7 +47,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
 
-import com.android.internal.util.XmlUtils;
 import com.android.launcher.R;
 import com.android.launcher2.LauncherSettings.Favorites;
 
@@ -67,7 +66,7 @@ public class LauncherProvider extends ContentProvider {
 
     private static final int DATABASE_VERSION = 9;
 
-    static final String AUTHORITY = "com.android.launcher2.settings";
+    static final String AUTHORITY = "com.xaulinxs.launcher2.settings";
 
     static final String TABLE_FAVORITES = "favorites";
     static final String PARAMETER_NOTIFY = "notify";
@@ -667,15 +666,15 @@ public class LauncherProvider extends ContentProvider {
                         db.update(TABLE_FAVORITES, values, updateWhere, null);
 
                         if (favoriteType == Favorites.ITEM_TYPE_WIDGET_CLOCK) {
-                            appWidgetManager.bindAppWidgetId(appWidgetId,
+                            appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
                                     new ComponentName("com.android.alarmclock",
                                     "com.android.alarmclock.AnalogAppWidgetProvider"));
                         } else if (favoriteType == Favorites.ITEM_TYPE_WIDGET_PHOTO_FRAME) {
-                            appWidgetManager.bindAppWidgetId(appWidgetId,
+                            appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
                                     new ComponentName("com.android.camera",
                                     "com.android.camera.PhotoAppWidgetProvider"));
                         } else if (favoriteType == Favorites.ITEM_TYPE_WIDGET_SEARCH) {
-                            appWidgetManager.bindAppWidgetId(appWidgetId,
+                            appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId,
                                     getSearchWidgetProvider());
                         }
                     } catch (RuntimeException ex) {
@@ -971,7 +970,7 @@ public class LauncherProvider extends ContentProvider {
 
                 allocatedAppWidgets = true;
                 
-                appWidgetManager.bindAppWidgetId(appWidgetId, cn);
+                appWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, cn);
             } catch (RuntimeException ex) {
                 Log.e(TAG, "Problem allocating appWidgetId", ex);
             }

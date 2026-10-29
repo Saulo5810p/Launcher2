@@ -71,8 +71,12 @@ public class IconCache {
     }
 
     public Drawable getFullResDefaultActivityIcon() {
-        return getFullResIcon(Resources.getSystem(),
-                com.android.internal.R.mipmap.sym_def_app_icon);
+        final Resources sys = Resources.getSystem();
+        int id = sys.getIdentifier("sym_def_app_icon", "mipmap", "android");
+        if (id == 0) {
+            id = android.R.drawable.sym_def_app_icon;
+        }
+        return getFullResIcon(sys, id);
     }
 
     public Drawable getFullResIcon(Resources resources, int iconId) {

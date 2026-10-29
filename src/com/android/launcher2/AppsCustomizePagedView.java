@@ -38,7 +38,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.TableMaskFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Process;
@@ -556,7 +555,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         Paint alphaClipPaint = null;
         if (createItemInfo instanceof PendingAddWidgetInfo) {
             if (((PendingAddWidgetInfo) createItemInfo).hasDefaultPreview) {
-                MaskFilter alphaClipTable = TableMaskFilter.CreateClipTable(0, 255);
+                MaskFilter alphaClipTable = Utilities.createClipTable(0, 255);
                 alphaClipPaint = new Paint();
                 alphaClipPaint.setMaskFilter(alphaClipTable);
             }
@@ -1458,6 +1457,6 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             count = mNumWidgetPages;
         }
 
-        return String.format(mContext.getString(stringId), page + 1, count);
+        return String.format(getContext().getString(stringId), page + 1, count);
     }
 }

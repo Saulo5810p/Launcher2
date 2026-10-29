@@ -149,7 +149,7 @@ public class PagedViewIcon extends CachedTextView implements Checkable {
             int hspace = getWidth() - compoundPaddingRight - compoundPaddingLeft;
             canvas.drawBitmap(overlay,
                     offset + compoundPaddingLeft + (hspace - overlay.getWidth()) / 2,
-                    mPaddingTop,
+                    getPaddingTop(),
                     mPaint);
         }
     }

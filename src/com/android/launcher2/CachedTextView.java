@@ -93,12 +93,12 @@ public class CachedTextView extends TextView {
         mTextCacheLeft = layout.getLineLeft(0) - getCacheLeftPadding();
         mTextCacheTop = top + layout.getLineTop(0) - mPaddingV - getCacheTopPadding();
 
-        mRectLeft = mScrollX + getLeft();
+        mRectLeft = getScrollX() + getLeft();
         mRectTop = 0;
-        mTextCacheScrollX = mScrollX;
+        mTextCacheScrollX = getScrollX();
 
         final float textCacheRight =
-            Math.min(left + layout.getLineRight(0) + mPaddingH, mScrollX + mRight - mLeft) +
+            Math.min(left + layout.getLineRight(0) + mPaddingH, getScrollX() + getRight() - getLeft()) +
             getCacheRightPadding();
         final float textCacheBottom = top + layout.getLineBottom(0) + mPaddingV +
             getCacheBottomPadding();
@@ -150,7 +150,7 @@ public class CachedTextView extends TextView {
             mIsTextCacheDirty = false;
         }
         if (mCache != null && !mIsBuildingCache) {
-            canvas.drawBitmap(mCache, mTextCacheLeft - mTextCacheScrollX + mScrollX,
+            canvas.drawBitmap(mCache, mTextCacheLeft - mTextCacheScrollX + getScrollX(),
                     mTextCacheTop, mCachePaint);
         }
         super.draw(canvas);

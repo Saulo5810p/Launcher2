@@ -53,19 +53,19 @@ public class LauncherApplication extends Application {
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
-        registerReceiver(mModel, filter);
+        Utilities.registerReceiverCompat(this, mModel, filter);
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         filter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        registerReceiver(mModel, filter);
+        Utilities.registerReceiverCompat(this, mModel, filter);
         filter = new IntentFilter();
         filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
-        registerReceiver(mModel, filter);
+        Utilities.registerReceiverCompat(this, mModel, filter);
         filter = new IntentFilter();
         filter.addAction(SearchManager.INTENT_ACTION_SEARCHABLES_CHANGED);
-        registerReceiver(mModel, filter);
+        Utilities.registerReceiverCompat(this, mModel, filter);
 
         // Register for changes to the favorites
         ContentResolver resolver = getContentResolver();
@@ -118,7 +118,8 @@ public class LauncherApplication extends Application {
     }
 
     public static boolean isScreenLarge() {
-        return sIsScreenLarge;
+        // Launcher2 modificado: layout de tablet forcado em qualquer tela
+        return true;
     }
 
     public static boolean isScreenLandscape(Context context) {

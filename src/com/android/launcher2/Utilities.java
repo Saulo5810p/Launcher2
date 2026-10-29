@@ -29,7 +29,7 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.TableMaskFilter;
+import android.graphics.MaskFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
@@ -41,6 +41,27 @@ import com.android.launcher.R;
  * Various utilities shared amongst the Launcher's classes.
  */
 final class Utilities {
+
+    /** TableMaskFilter e' oculta no SDK publico: tenta por reflexao e, se falhar, segue sem o filtro. */
+    static MaskFilter createClipTable(int min, int max) {
+        try {
+            Class<?> c = Class.forName("android.graphics.TableMaskFilter");
+            return (MaskFilter) c.getMethod("CreateClipTable", int.class, int.class)
+                    .invoke(null, min, max);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /** Android 13+ exige informar a flag de exportacao ao registrar receivers em runtime. */
+    static void registerReceiverCompat(android.content.Context context,
+            android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            context.registerReceiver(receiver, filter, android.content.Context.RECEIVER_EXPORTED);
+        } else {
+            context.registerReceiver(receiver, filter);
+        }
+    }
     private static final String TAG = "Launcher.Utilities";
 
     private static final boolean TEXT_BURN = false;
@@ -241,9 +262,9 @@ final class Utilities {
 
         sBlurPaint.setMaskFilter(new BlurMaskFilter(5 * density, BlurMaskFilter.Blur.NORMAL));
         sGlowColorPressedPaint.setColor(0xffffc300);
-        sGlowColorPressedPaint.setMaskFilter(TableMaskFilter.CreateClipTable(0, 30));
+        sGlowColorPressedPaint.setMaskFilter(Utilities.createClipTable(0, 30));
         sGlowColorFocusedPaint.setColor(0xffff8e00);
-        sGlowColorFocusedPaint.setMaskFilter(TableMaskFilter.CreateClipTable(0, 30));
+        sGlowColorFocusedPaint.setMaskFilter(Utilities.createClipTable(0, 30));
 
         ColorMatrix cm = new ColorMatrix();
         cm.setSaturation(0.2f);

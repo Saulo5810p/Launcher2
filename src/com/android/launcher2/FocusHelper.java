@@ -87,7 +87,7 @@ public class FocusHelper {
     static boolean handleAppsCustomizeTabKeyEvent(View v, int keyCode, KeyEvent e) {
         final TabHost tabHost = findTabHostParent(v);
         final ViewGroup contents = (ViewGroup)
-                tabHost.findViewById(com.android.internal.R.id.tabcontent);
+                tabHost.findViewById(android.R.id.tabcontent);
         final View shop = tabHost.findViewById(R.id.market_button);
 
         final int action = e.getAction();
@@ -145,7 +145,7 @@ public class FocusHelper {
         final PagedViewGridLayout parent = (PagedViewGridLayout) w.getParent();
         final PagedView container = (PagedView) parent.getParent();
         final TabHost tabHost = findTabHostParent(container);
-        final TabWidget tabs = (TabWidget) tabHost.findViewById(com.android.internal.R.id.tabs);
+        final TabWidget tabs = (TabWidget) tabHost.findViewById(android.R.id.tabs);
         final int widgetIndex = parent.indexOfChild(w);
         final int widgetCount = parent.getChildCount();
         final int pageIndex = ((PagedView) container).indexToPage(container.indexOfChild(parent));
@@ -305,7 +305,7 @@ public class FocusHelper {
         // PagedViewCellLayout/PagedViewCellLayoutChildren relationship
         final PagedView container = (PagedView) parentLayout.getParent();
         final TabHost tabHost = findTabHostParent(container);
-        final TabWidget tabs = (TabWidget) tabHost.findViewById(com.android.internal.R.id.tabs);
+        final TabWidget tabs = (TabWidget) tabHost.findViewById(android.R.id.tabs);
         final int iconIndex = itemContainer.indexOfChild(v);
         final int itemCount = itemContainer.getChildCount();
         final int pageIndex = ((PagedView) container).indexToPage(container.indexOfChild(parentLayout));
@@ -451,7 +451,7 @@ public class FocusHelper {
         final FocusOnlyTabWidget parent = (FocusOnlyTabWidget) v.getParent();
         final TabHost tabHost = findTabHostParent(parent);
         final ViewGroup contents = (ViewGroup)
-                tabHost.findViewById(com.android.internal.R.id.tabcontent);
+                tabHost.findViewById(android.R.id.tabcontent);
         final int tabCount = parent.getTabCount();
         final int tabIndex = parent.getChildTabIndex(v);
 

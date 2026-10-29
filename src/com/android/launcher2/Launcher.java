@@ -28,7 +28,6 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.SearchManager;
-import android.app.StatusBarManager;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
@@ -58,7 +57,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.text.Selection;
@@ -89,7 +87,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.common.Search;
 import com.android.launcher.R;
 import com.android.launcher2.DropTarget.DragObject;
 
@@ -126,6 +123,7 @@ public final class Launcher extends Activity
     private static final int REQUEST_PICK_SHORTCUT = 7;
     private static final int REQUEST_PICK_APPWIDGET = 9;
     private static final int REQUEST_PICK_WALLPAPER = 10;
+    private static final int REQUEST_BIND_APPWIDGET = 11;
 
     static final String EXTRA_SHORTCUT_DUPLICATE = "duplicate";
 
@@ -204,6 +202,8 @@ public final class Launcher extends Activity
     private boolean mPaused = true;
     private boolean mRestoring;
     private boolean mWaitingForResult;
+    private PendingAddWidgetInfo mPendingBindInfo;
+    private int mPendingBindAppWidgetId = -1;
     private boolean mOnResumeNeedsLoad;
 
     private Bundle mSavedInstanceState;
@@ -317,7 +317,7 @@ public final class Launcher extends Activity
         Selection.setSelection(mDefaultKeySsb, 0);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        registerReceiver(mCloseSystemDialogsReceiver, filter);
+        Utilities.registerReceiverCompat(this, mCloseSystemDialogsReceiver, filter);
 
         boolean searchVisible = false;
         boolean voiceVisible = false;
@@ -506,6 +506,24 @@ public final class Launcher extends Activity
     protected void onActivityResult(final int requestCode, int resultCode, final Intent data) {
         boolean delayExitSpringLoadedMode = false;
         mWaitingForResult = false;
+
+        if (requestCode == REQUEST_BIND_APPWIDGET) {
+            final PendingAddWidgetInfo bindInfo = mPendingBindInfo;
+            final int bindId = (data != null)
+                    ? data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mPendingBindAppWidgetId)
+                    : mPendingBindAppWidgetId;
+            mPendingBindInfo = null;
+            mPendingBindAppWidgetId = -1;
+            if (resultCode == RESULT_OK && bindInfo != null && bindId != -1) {
+                addAppWidgetImpl(bindId, bindInfo);
+            } else {
+                if (bindId != -1) {
+                    mAppWidgetHost.deleteAppWidgetId(bindId);
+                }
+                exitSpringLoadedDragModeDelayed(false, false);
+            }
+            return;
+        }
 
         // The pattern used here is that a user PICKs a specific application,
         // which, depending on the target, might need to CREATE the actual target.
@@ -911,14 +929,10 @@ public final class Launcher extends Activity
             Resources r = getResources();
             // The default padding values are private API currently, but will be added in
             // API level 15. The current values are (8, 8, 8, 8).
-            p.left = r.getDimensionPixelSize(com.android.internal.
-                    R.dimen.default_app_widget_padding_left);
-            p.right = r.getDimensionPixelSize(com.android.internal.
-                    R.dimen.default_app_widget_padding_right);
-            p.top = r.getDimensionPixelSize(com.android.internal.
-                    R.dimen.default_app_widget_padding_top);
-            p.bottom = r.getDimensionPixelSize(com.android.internal.
-                    R.dimen.default_app_widget_padding_bottom);
+            p.left = r.getDimensionPixelSize(R.dimen.default_app_widget_padding_left);
+            p.right = r.getDimensionPixelSize(R.dimen.default_app_widget_padding_right);
+            p.top = r.getDimensionPixelSize(R.dimen.default_app_widget_padding_top);
+            p.bottom = r.getDimensionPixelSize(R.dimen.default_app_widget_padding_bottom);
         }
 
         return p;
@@ -1048,7 +1062,7 @@ public final class Launcher extends Activity
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_USER_PRESENT);
-        registerReceiver(mReceiver, filter);
+        Utilities.registerReceiverCompat(this, mReceiver, filter);
 
         mAttached = true;
         mVisible = true;
@@ -1153,7 +1167,7 @@ public final class Launcher extends Activity
         return mModel;
     }
 
-    void closeSystemDialogs() {
+    void closeLauncherDialogs() {
         getWindow().closeAllPanels();
 
         /**
@@ -1184,7 +1198,7 @@ public final class Launcher extends Activity
         // Close the menu
         if (Intent.ACTION_MAIN.equals(intent.getAction())) {
             // also will cancel mWaitingForResult.
-            closeSystemDialogs();
+            closeLauncherDialogs();
 
             boolean alreadyOnHome = ((intent.getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
                         != Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
@@ -1291,7 +1305,6 @@ public final class Launcher extends Activity
         mWorkspace = null;
         mDragController = null;
 
-        ValueAnimator.clearAllAnimations();
     }
 
     public DragController getDragController() {
@@ -1320,7 +1333,7 @@ public final class Launcher extends Activity
         }
         if (appSearchData == null) {
             appSearchData = new Bundle();
-            appSearchData.putString(Search.SOURCE, "launcher-search");
+            appSearchData.putString("source", "launcher-search");
         }
 
         final SearchManager searchManager =
@@ -1463,7 +1476,23 @@ public final class Launcher extends Activity
                 }
             }
 
-            startActivityForResultSafely(intent, REQUEST_CREATE_APPWIDGET);
+            // A activity de configuracao pode nao ser exportada: o host precisa abri-la pelo sistema.
+            boolean hasConfigData = info != null && info.mimeType != null
+                    && !info.mimeType.isEmpty();
+            boolean started = false;
+            if (!hasConfigData) {
+                try {
+                    mAppWidgetHost.startAppWidgetConfigureActivityForResult(
+                            this, appWidgetId, 0, REQUEST_CREATE_APPWIDGET, null);
+                    mWaitingForResult = true;
+                    started = true;
+                } catch (Exception e) {
+                    Log.w(TAG, "Configuracao via host falhou; tentando intent direta", e);
+                }
+            }
+            if (!started) {
+                startActivityForResultSafely(intent, REQUEST_CREATE_APPWIDGET);
+            }
         } else {
             // Otherwise just add it
             completeAddAppWidget(appWidgetId, info.container, info.screen);
@@ -1518,8 +1547,18 @@ public final class Launcher extends Activity
         }
 
         int appWidgetId = getAppWidgetHost().allocateAppWidgetId();
-        AppWidgetManager.getInstance(this).bindAppWidgetId(appWidgetId, info.componentName);
-        addAppWidgetImpl(appWidgetId, info);
+        if (AppWidgetManager.getInstance(this).bindAppWidgetIdIfAllowed(
+                appWidgetId, info.componentName)) {
+            addAppWidgetImpl(appWidgetId, info);
+        } else {
+            // Sem a permissao BIND_APPWIDGET (so apps de sistema): pede autorizacao ao usuario.
+            mPendingBindInfo = info;
+            mPendingBindAppWidgetId = appWidgetId;
+            Intent bind = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            bind.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            bind.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.componentName);
+            startActivityForResultSafely(bind, REQUEST_BIND_APPWIDGET);
+        }
     }
 
     void processShortcut(Intent intent) {
@@ -1567,9 +1606,15 @@ public final class Launcher extends Activity
     }
 
     private void showNotifications() {
-        final StatusBarManager statusBar = (StatusBarManager) getSystemService(STATUS_BAR_SERVICE);
-        if (statusBar != null) {
-            statusBar.expand();
+        // StatusBarManager e' oculto no SDK publico: usa reflexao (precisa de EXPAND_STATUS_BAR).
+        try {
+            final Object statusBar = getSystemService("statusbar");
+            if (statusBar != null) {
+                final Class<?> sbm = Class.forName("android.app.StatusBarManager");
+                sbm.getMethod("expandNotificationsPanel").invoke(statusBar);
+            }
+        } catch (Throwable t) {
+            Log.w(TAG, "Nao foi possivel abrir o painel de notificacoes", t);
         }
     }
 
@@ -1609,7 +1654,7 @@ public final class Launcher extends Activity
                 case KeyEvent.KEYCODE_HOME:
                     return true;
                 case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    if (SystemProperties.getInt("debug.launcher2.dumpstate", 0) != 0) {
+                    if (false) {
                         dumpState();
                         return true;
                     }
@@ -2194,20 +2239,20 @@ public final class Launcher extends Activity
             scaleAnim.addUpdateListener(new LauncherAnimatorUpdateListener() {
                 public void onAnimationUpdate(float a, float b) {
                     ((View) toView.getParent()).invalidate();
-                    toView.fastInvalidate();
-                    toView.setFastScaleX(a * scale + b * 1f);
-                    toView.setFastScaleY(a * scale + b * 1f);
+                    toView.invalidate();
+                    toView.setScaleX(a * scale + b * 1f);
+                    toView.setScaleY(a * scale + b * 1f);
                 }
             });
 
             toView.setVisibility(View.VISIBLE);
-            toView.setFastAlpha(0f);
+            toView.setAlpha(0f);
             ValueAnimator alphaAnim = ValueAnimator.ofFloat(0f, 1f).setDuration(fadeDuration);
             alphaAnim.setInterpolator(new DecelerateInterpolator(1.5f));
             alphaAnim.addUpdateListener(new LauncherAnimatorUpdateListener() {
                 public void onAnimationUpdate(float a, float b) {
                     // don't need to invalidate because we do so above
-                    toView.setFastAlpha(a * 0f + b * 1f);
+                    toView.setAlpha(a * 0f + b * 1f);
                 }
             });
             alphaAnim.setStartDelay(startDelay);
@@ -2313,9 +2358,9 @@ public final class Launcher extends Activity
             scaleAnim.setInterpolator(new Workspace.ZoomInInterpolator());
             scaleAnim.addUpdateListener(new LauncherAnimatorUpdateListener() {
                 public void onAnimationUpdate(float a, float b) {
-                    ((View)fromView.getParent()).fastInvalidate();
-                    fromView.setFastScaleX(a * oldScaleX + b * scaleFactor);
-                    fromView.setFastScaleY(a * oldScaleY + b * scaleFactor);
+                    ((View)fromView.getParent()).invalidate();
+                    fromView.setScaleX(a * oldScaleX + b * scaleFactor);
+                    fromView.setScaleY(a * oldScaleY + b * scaleFactor);
                 }
             });
             final ValueAnimator alphaAnim = ValueAnimator.ofFloat(0f, 1f);
@@ -2324,7 +2369,7 @@ public final class Launcher extends Activity
             alphaAnim.addUpdateListener(new LauncherAnimatorUpdateListener() {
                 public void onAnimationUpdate(float a, float b) {
                     // don't need to invalidate because we do so above
-                    fromView.setFastAlpha(a * 1f + b * 0f);
+                    fromView.setAlpha(a * 1f + b * 0f);
                 }
             });
             if (fromView instanceof LauncherTransitionable) {
@@ -2801,7 +2846,7 @@ public final class Launcher extends Activity
     private class CloseSystemDialogsIntentReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            closeSystemDialogs();
+            closeLauncherDialogs();
         }
     }
 

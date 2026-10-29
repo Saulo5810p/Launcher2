@@ -124,7 +124,7 @@ public class Folder extends LinearLayout implements DragSource, View.OnClickList
         mMaxCountY = LauncherModel.getCellCountY();
 
         mInputMethodManager = (InputMethodManager)
-                mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         Resources res = getResources();
         mExpandDuration = res.getInteger(R.integer.config_folderAnimDuration);

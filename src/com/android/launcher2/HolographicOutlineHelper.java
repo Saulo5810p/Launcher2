@@ -23,7 +23,6 @@ import android.graphics.MaskFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.TableMaskFilter;
 
 public class HolographicOutlineHelper {
     private final Paint mHolographicPaint = new Paint();
@@ -61,7 +60,7 @@ public class HolographicOutlineHelper {
         sMediumInnerBlurMaskFilter = new BlurMaskFilter(scale * 2.0f, BlurMaskFilter.Blur.NORMAL);
     }
 
-    private static final MaskFilter sCoarseClipTable = TableMaskFilter.CreateClipTable(0, 200);
+    private static final MaskFilter sCoarseClipTable = Utilities.createClipTable(0, 200);
 
     private int[] mTempOffset = new int[2];
 
@@ -73,7 +72,7 @@ public class HolographicOutlineHelper {
         mErasePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
         mErasePaint.setFilterBitmap(true);
         mErasePaint.setAntiAlias(true);
-        MaskFilter alphaClipTable = TableMaskFilter.CreateClipTable(180, 255);
+        MaskFilter alphaClipTable = Utilities.createClipTable(180, 255);
         mAlphaClipPaint.setMaskFilter(alphaClipTable);
     }
 

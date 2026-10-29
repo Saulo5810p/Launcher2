@@ -18,32 +18,26 @@
 */
 -->
 <manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.launcher">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <original-package android:name="com.android.launcher2" />
 
     <permission
-        android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:name="com.xaulinxs.launcher2.permission.INSTALL_SHORTCUT"
         android:protectionLevel="normal"
         android:label="@string/permlab_install_shortcut"
         android:description="@string/permdesc_install_shortcut" />
     <permission
-        android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:name="com.xaulinxs.launcher2.permission.UNINSTALL_SHORTCUT"
         android:protectionLevel="normal"
         android:label="@string/permlab_uninstall_shortcut"
         android:description="@string/permdesc_uninstall_shortcut"/>
     <permission
-        android:name="com.android.launcher.permission.READ_SETTINGS"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:name="com.xaulinxs.launcher2.permission.READ_SETTINGS"
         android:protectionLevel="normal"
         android:label="@string/permlab_read_settings"
         android:description="@string/permdesc_read_settings"/>
     <permission
-        android:name="com.android.launcher.permission.WRITE_SETTINGS"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:name="com.xaulinxs.launcher2.permission.WRITE_SETTINGS"
         android:protectionLevel="normal"
         android:label="@string/permlab_write_settings"
         android:description="@string/permdesc_write_settings"/>
@@ -52,9 +46,11 @@
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
-    <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
-    <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="com.xaulinxs.launcher2.permission.READ_SETTINGS" />
+    <uses-permission android:name="com.xaulinxs.launcher2.permission.WRITE_SETTINGS" />
 
     <application
         android:name="com.android.launcher2.LauncherApplication"
@@ -64,6 +60,7 @@
         android:largeHeap="@bool/config_largeHeap">
         <activity
             android:name="com.android.launcher2.Launcher"
+            android:exported="true"
             android:launchMode="singleTask"
             android:clearTaskOnLaunch="true"
             android:stateNotNeeded="true"
@@ -80,7 +77,7 @@
 
         <activity
             android:name="com.android.launcher2.WallpaperChooser"
-            style="@style/Theme.WallpaperPicker"
+            android:exported="true"
             android:label="@string/pick_wallpaper"
             android:icon="@drawable/ic_launcher_wallpaper"
             android:finishOnCloseSystemDialogs="true"
@@ -93,20 +90,12 @@
                 android:resource="@xml/wallpaper_picker_preview" />
         </activity>
 
-        <activity android:name="com.android.launcher2.RocketLauncher"
-            android:label="@string/dream_name"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.DREAM" />
-            </intent-filter>
-        </activity>
 
         <!-- Intent received used to install shortcuts from other applications -->
         <receiver
             android:name="com.android.launcher2.InstallShortcutReceiver"
-            android:permission="com.android.launcher.permission.INSTALL_SHORTCUT">
+            android:exported="true"
+            android:permission="com.xaulinxs.launcher2.permission.INSTALL_SHORTCUT">
             <intent-filter>
                 <action android:name="com.android.launcher.action.INSTALL_SHORTCUT" />
             </intent-filter>
@@ -115,7 +104,8 @@
         <!-- Intent received used to uninstall shortcuts from other applications -->
         <receiver
             android:name="com.android.launcher2.UninstallShortcutReceiver"
-            android:permission="com.android.launcher.permission.UNINSTALL_SHORTCUT">
+            android:exported="true"
+            android:permission="com.xaulinxs.launcher2.permission.UNINSTALL_SHORTCUT">
             <intent-filter>
                 <action android:name="com.android.launcher.action.UNINSTALL_SHORTCUT" />
             </intent-filter>
@@ -124,9 +114,10 @@
         <!-- The settings provider contains Home's data, like the workspace favorites -->
         <provider
             android:name="com.android.launcher2.LauncherProvider"
-            android:authorities="com.android.launcher2.settings"
-            android:writePermission="com.android.launcher.permission.WRITE_SETTINGS"
-            android:readPermission="com.android.launcher.permission.READ_SETTINGS" />
+            android:exported="true"
+            android:authorities="com.xaulinxs.launcher2.settings"
+            android:writePermission="com.xaulinxs.launcher2.permission.WRITE_SETTINGS"
+            android:readPermission="com.xaulinxs.launcher2.permission.READ_SETTINGS" />
 
     </application>
 </manifest>
