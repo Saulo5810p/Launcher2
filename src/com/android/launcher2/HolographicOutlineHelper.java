@@ -105,6 +105,9 @@ public class HolographicOutlineHelper {
     void applyOuterBlur(Bitmap bitmap, Canvas canvas, int color) {
         mBlurPaint.setMaskFilter(sThickOuterBlurMaskFilter);
         Bitmap glow = bitmap.extractAlpha(mBlurPaint, mTempOffset);
+        if (!Utilities.hasClipTable()) {
+            Utilities.applyClipTable(glow, 0, 200);   // fallback do TableMaskFilter
+        }
 
         // Use the clip table to make the glow heavier closer to the outline
         mHolographicPaint.setMaskFilter(sCoarseClipTable);
@@ -129,10 +132,14 @@ public class HolographicOutlineHelper {
 
         // We start by removing most of the alpha channel so as to ignore shadows, and
         // other types of partial transparency when defining the shape of the object
+        final boolean useDefaultClip = (alphaClipPaint == null);
         if (alphaClipPaint == null) {
             alphaClipPaint = mAlphaClipPaint;
         }
         Bitmap glowShape = srcDst.extractAlpha(alphaClipPaint, mTempOffset);
+        if (useDefaultClip && !Utilities.hasClipTable()) {
+            Utilities.applyClipTable(glowShape, 180, 255);   // fallback do TableMaskFilter
+        }
 
         // calculate the outer blur first
         BlurMaskFilter outerBlurMaskFilter;

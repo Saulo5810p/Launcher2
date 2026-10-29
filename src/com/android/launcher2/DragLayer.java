@@ -539,7 +539,7 @@ public class DragLayer extends FrameLayout {
         if (mDropView != null) {
             // We are animating an item that was just dropped on the home screen.
             // Render its View in the current animation position.
-            canvas.save(Canvas.MATRIX_SAVE_FLAG);
+            canvas.save();
             final int xPos = mDropViewPos[0] - mDropView.getScrollX();
             final int yPos = mDropViewPos[1] - mDropView.getScrollY();
             int width = mDropView.getMeasuredWidth();

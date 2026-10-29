@@ -53,6 +53,47 @@ final class Utilities {
         }
     }
 
+
+    private static Boolean sClipTableAvailable;
+
+    /** true se o TableMaskFilter oculto pode ser usado neste aparelho. */
+    static synchronized boolean hasClipTable() {
+        if (sClipTableAvailable == null) {
+            sClipTableAvailable = createClipTable(0, 255) != null;
+        }
+        return sClipTableAvailable;
+    }
+
+    /**
+     * Fallback em Java puro do TableMaskFilter.CreateClipTable(min, max): aplica, nos pixels de
+     * um bitmap ALPHA_8 mutavel, a mesma tabela do Skia (SkTableMaskFilter::MakeClipTable).
+     */
+    static void applyClipTable(android.graphics.Bitmap mask, int min, int max) {
+        if (mask == null || mask.getConfig() != android.graphics.Bitmap.Config.ALPHA_8
+                || !mask.isMutable()) {
+            return;
+        }
+        if (max == 0) max = 1;
+        if (min >= max) min = max - 1;
+        final byte[] lut = new byte[256];
+        final float scale = 255.0f / (max - min);
+        for (int i = 0; i < 256; i++) {
+            int v;
+            if (i <= min) v = 0;
+            else if (i >= max) v = 255;
+            else v = Math.round(scale * (i - min));
+            lut[i] = (byte) v;
+        }
+        final java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocate(mask.getByteCount());
+        mask.copyPixelsToBuffer(buf);
+        final byte[] px = buf.array();
+        for (int i = 0; i < px.length; i++) {
+            px[i] = lut[px[i] & 0xff];
+        }
+        buf.rewind();
+        mask.copyPixelsFromBuffer(buf);
+    }
+
     /** Android 13+ exige informar a flag de exportacao ao registrar receivers em runtime. */
     static void registerReceiverCompat(android.content.Context context,
             android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {
@@ -199,6 +240,9 @@ final class Utilities {
 
             int[] xy = new int[2];
             Bitmap mask = src.extractAlpha(sBlurPaint, xy);
+            if (!hasClipTable()) {
+                applyClipTable(mask, 0, 30);   // fallback do TableMaskFilter
+            }
 
             float px = (destWidth - src.getWidth()) / 2;
             float py = (destHeight - src.getHeight()) / 2;
