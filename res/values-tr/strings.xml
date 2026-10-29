@@ -17,11 +17,10 @@
 */
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="application_name" msgid="8424725141379931883">"Launcher"</string>
     <string name="uid_name" msgid="3371120195364560632">"Android Core Apps"</string>
-    <string name="folder_name" msgid="8551881338202938211"></string>
+    <string name="folder_name" msgid="8551881338202938211" />
     <string name="chooser_wallpaper" msgid="5988031014201479733">"Buradan duvar kağıdını seçin:"</string>
     <string name="wallpaper_instructions" msgid="4215640646180727542">"Duvar kağıdını ayarla"</string>
     <string name="pick_wallpaper" msgid="5630222540525626723">"Duvar Kağıtları"</string>
@@ -93,4 +92,7 @@
     <string name="folder_cling_move_item" msgid="270598675060435169">"Bir uygulamayı taşımak için, uygulamaya dokunun ve basılı tutun."</string>
     <string name="folder_cling_create_folder" msgid="289412698047625601">"Ana ekranınızda yeni bir klasör oluşturmak için, bir uygulamayı diğerinin üzerine getirin."</string>
     <string name="cling_dismiss" msgid="2780907108735868381">"Tamam"</string>
+    <string name="wallpaper_dialog_title" msgid="6395005465873616423">"Duvar kağıdı seçin"</string>
+    <string name="wallpaper_chooser_empty" msgid="5909737215399452696">"Kullanılabilir hiç duvar kağıdı yok"</string>
+    <string name="wallpaper_cancel" msgid="1110492200533814461">"İptal"</string>
 </resources>

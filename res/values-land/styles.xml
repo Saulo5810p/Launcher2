@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-* Copyright (C) 2008 The Android Open Source Project
+* Copyright (C) 2011 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,57 +18,11 @@
 -->
 
 <resources>
-<!-- Workspace -->
-    <style name="WorkspaceScreen">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-    </style>
-<!-- Search Bar -->
+    <!-- Workspace -->
     <style name="QSBBar">
         <item name="android:orientation">vertical</item>
         <item name="android:layout_width">@dimen/qsb_bar_height</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_gravity">left</item>
-    </style>
-    <style name="SearchDropTargetBar">
-        <item name="android:orientation">vertical</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-    </style>
-    <style name="SearchButton">
-        <item name="android:layout_gravity">center_horizontal</item>
-        <item name="android:paddingTop">@dimen/toolbar_button_vertical_padding</item>
-        <item name="android:paddingBottom">@dimen/toolbar_button_vertical_padding</item>
-        <item name="android:paddingLeft">@dimen/toolbar_button_horizontal_padding</item>
-        <item name="android:paddingRight">@dimen/toolbar_button_horizontal_padding</item>
-    </style>
-    <style name="SearchButtonDivider">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center_horizontal</item>
-    </style>
-    <style name="DropTargetButtonContainer">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">0dp</item>
-    </style>
-    <style name="DropTargetButton">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:gravity">center_horizontal</item>
-        <item name="android:paddingTop">@dimen/toolbar_button_vertical_padding</item>
-        <item name="android:paddingBottom">@dimen/toolbar_button_vertical_padding</item>
-        <item name="android:paddingLeft">@dimen/toolbar_button_horizontal_padding</item>
-        <item name="android:paddingRight">@dimen/toolbar_button_horizontal_padding</item>
-        <item name="android:shadowColor">#DD000000</item>
-        <item name="android:shadowDx">0.0</item>
-        <item name="android:shadowDy">1.0</item>
-        <item name="android:shadowRadius">4.0</item>
-    </style>
-
-    <style name="TabIndicator.AppsCustomize">
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingBottom">10dp</item>
+        <item name="android:layout_gravity">left|center_vertical</item>
     </style>
 </resources>
-

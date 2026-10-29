@@ -17,11 +17,10 @@
 */
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="application_name" msgid="8424725141379931883">"Isiqalisi"</string>
     <string name="uid_name" msgid="3371120195364560632">"I-Android Core Apps"</string>
-    <string name="folder_name" msgid="8551881338202938211"></string>
+    <string name="folder_name" msgid="8551881338202938211" />
     <string name="chooser_wallpaper" msgid="5988031014201479733">"Khetha iphephadonga kusuka"</string>
     <string name="wallpaper_instructions" msgid="4215640646180727542">"Hlela iphephadonga"</string>
     <string name="pick_wallpaper" msgid="5630222540525626723">"Amaphephadonga"</string>
@@ -93,4 +92,7 @@
     <string name="folder_cling_move_item" msgid="270598675060435169">"Ukususa insiza, thinta &amp; uyibambe."</string>
     <string name="folder_cling_create_folder" msgid="289412698047625601">"Ukwenza ifolda entsha eskrinini sakho sasekhaya, beka insiza eyodwa phezulu kwenye."</string>
     <string name="cling_dismiss" msgid="2780907108735868381">"KULUNGILE"</string>
+    <string name="wallpaper_dialog_title" msgid="6395005465873616423">"Khetha iphephadonga"</string>
+    <string name="wallpaper_chooser_empty" msgid="5909737215399452696">"Awekho amaphephadonga atholakalayo"</string>
+    <string name="wallpaper_cancel" msgid="1110492200533814461">"Khansela"</string>
 </resources>

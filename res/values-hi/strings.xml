@@ -17,11 +17,10 @@
 */
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="application_name" msgid="8424725141379931883">"लॉन्चर"</string>
     <string name="uid_name" msgid="3371120195364560632">"Android मुख्य एप्लिकेशन"</string>
-    <string name="folder_name" msgid="8551881338202938211"></string>
+    <string name="folder_name" msgid="8551881338202938211" />
     <string name="chooser_wallpaper" msgid="5988031014201479733">"इनमें से वॉलपेपर का चयन करें"</string>
     <string name="wallpaper_instructions" msgid="4215640646180727542">"वॉलपेपर सेट करें"</string>
     <string name="pick_wallpaper" msgid="5630222540525626723">"वॉलपेपर"</string>
@@ -93,4 +92,7 @@
     <string name="folder_cling_move_item" msgid="270598675060435169">"किसी एप्लिकेशन को ले जाने के लिए, उसे स्‍पर्श करके रखें."</string>
     <string name="folder_cling_create_folder" msgid="289412698047625601">"अपनी होम स्‍क्रीन पर कोई नया फ़ोल्डर बनाने के लिए, एक एप्लिकेशन को दूसरे के शीर्ष पर स्‍टैक करें."</string>
     <string name="cling_dismiss" msgid="2780907108735868381">"ठीक"</string>
+    <string name="wallpaper_dialog_title" msgid="6395005465873616423">"वॉलपेपर का चयन करें"</string>
+    <string name="wallpaper_chooser_empty" msgid="5909737215399452696">"कोई वॉलपेपर उपलब्ध नहीं"</string>
+    <string name="wallpaper_cancel" msgid="1110492200533814461">"रद्द करें"</string>
 </resources>

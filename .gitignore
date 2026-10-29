@@ -1,0 +1,8 @@
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+.backup_tablet/
+*.orig
+*.bak

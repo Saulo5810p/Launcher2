@@ -17,11 +17,10 @@
 */
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="application_name" msgid="8424725141379931883">"Zaganjalnik"</string>
     <string name="uid_name" msgid="3371120195364560632">"Android Core Apps"</string>
-    <string name="folder_name" msgid="8551881338202938211"></string>
+    <string name="folder_name" msgid="8551881338202938211" />
     <string name="chooser_wallpaper" msgid="5988031014201479733">"Izberi sliko za ozadje iz"</string>
     <string name="wallpaper_instructions" msgid="4215640646180727542">"Nastavi sliko za ozadje"</string>
     <string name="pick_wallpaper" msgid="5630222540525626723">"Slike za ozadje"</string>
@@ -93,4 +92,7 @@
     <string name="folder_cling_move_item" msgid="270598675060435169">"Če želite premakniti program, se ga dotaknite in ga pridržite."</string>
     <string name="folder_cling_create_folder" msgid="289412698047625601">"Če želite na začetnem zaslonu ustvariti novo mapo, postavite en program na drugega."</string>
     <string name="cling_dismiss" msgid="2780907108735868381">"V redu"</string>
+    <string name="wallpaper_dialog_title" msgid="6395005465873616423">"Izberite sliko za ozadje"</string>
+    <string name="wallpaper_chooser_empty" msgid="5909737215399452696">"Ni slik za ozadje"</string>
+    <string name="wallpaper_cancel" msgid="1110492200533814461">"Prekliči"</string>
 </resources>

@@ -17,11 +17,10 @@
 */
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="application_name" msgid="8424725141379931883">"Launcher"</string>
     <string name="uid_name" msgid="3371120195364560632">"Aplicaciones del núcleo de Android"</string>
-    <string name="folder_name" msgid="8551881338202938211"></string>
+    <string name="folder_name" msgid="8551881338202938211" />
     <string name="chooser_wallpaper" msgid="5988031014201479733">"Seleccionar papel tapiz desde"</string>
     <string name="wallpaper_instructions" msgid="4215640646180727542">"Definir como fondo de pantalla"</string>
     <string name="pick_wallpaper" msgid="5630222540525626723">"Papeles tapiz"</string>
@@ -93,4 +92,7 @@
     <string name="folder_cling_move_item" msgid="270598675060435169">"Para mover una aplicación, tócala &amp; mantenla presionada."</string>
     <string name="folder_cling_create_folder" msgid="289412698047625601">"Para crear una nueva carpeta en tu pantalla principal, coloca una aplicación encima de la otra."</string>
     <string name="cling_dismiss" msgid="2780907108735868381">"Aceptar"</string>
+    <string name="wallpaper_dialog_title" msgid="6395005465873616423">"Seleccionar el fondo de pantalla"</string>
+    <string name="wallpaper_chooser_empty" msgid="5909737215399452696">"Ningún fondo de pantalla disponible"</string>
+    <string name="wallpaper_cancel" msgid="1110492200533814461">"Cancelar"</string>
 </resources>

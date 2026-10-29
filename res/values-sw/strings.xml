@@ -17,11 +17,10 @@
 */
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="application_name" msgid="8424725141379931883">"Kizinduzi"</string>
     <string name="uid_name" msgid="3371120195364560632">"Programu Kuu za Android"</string>
-    <string name="folder_name" msgid="8551881338202938211"></string>
+    <string name="folder_name" msgid="8551881338202938211" />
     <string name="chooser_wallpaper" msgid="5988031014201479733">"Chagua pazia kutoka"</string>
     <string name="wallpaper_instructions" msgid="4215640646180727542">"Weka pazia"</string>
     <string name="pick_wallpaper" msgid="5630222540525626723">"Taswira"</string>
@@ -93,4 +92,7 @@
     <string name="folder_cling_move_item" msgid="270598675060435169">"Kuhamisha prog, gusa na; uishikilie."</string>
     <string name="folder_cling_create_folder" msgid="289412698047625601">"Kuunda folda katika skrini yako ya nyumbani rundika prog m oja juu ya nyingine."</string>
     <string name="cling_dismiss" msgid="2780907108735868381">"Sawa"</string>
+    <string name="wallpaper_dialog_title" msgid="6395005465873616423">"Chagua pazia"</string>
+    <string name="wallpaper_chooser_empty" msgid="5909737215399452696">"Hakuna pazia zinazopatikana"</string>
+    <string name="wallpaper_cancel" msgid="1110492200533814461">"Ghairi"</string>
 </resources>

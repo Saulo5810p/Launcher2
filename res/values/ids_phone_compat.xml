@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ids usados pelo Java que so existiam nos layouts de telefone (findViewById -> null, como no tablet) -->
+    <item name="dock_divider" type="id" />
+    <item name="folder_cling" type="id" />
+    <item name="hotseat" type="id" />
+    <item name="layout" type="id" />
+    <item name="qsb_divider" type="id" />
+    <item name="search_button_container" type="id" />
+    <item name="voice_button_container" type="id" />
+    <item name="wallpaper_list" type="id" />
+</resources>

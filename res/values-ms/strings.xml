@@ -17,11 +17,10 @@
 */
  -->
 
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="application_name" msgid="8424725141379931883">"Pelancar"</string>
     <string name="uid_name" msgid="3371120195364560632">"Apl Teras Android"</string>
-    <string name="folder_name" msgid="8551881338202938211"></string>
+    <string name="folder_name" msgid="8551881338202938211" />
     <string name="chooser_wallpaper" msgid="5988031014201479733">"Pilih kertas dinding daripada"</string>
     <string name="wallpaper_instructions" msgid="4215640646180727542">"Tetapkan kertas dinding"</string>
     <string name="pick_wallpaper" msgid="5630222540525626723">"Kertas dinding"</string>
@@ -93,4 +92,7 @@
     <string name="folder_cling_move_item" msgid="270598675060435169">"Untuk memindahkan aplikasi, sentuh &amp; tahankannya."</string>
     <string name="folder_cling_create_folder" msgid="289412698047625601">"Untuk membuat folder baharu pada skrin utama anda, tindihkan satu aplikasi di atas yang lain."</string>
     <string name="cling_dismiss" msgid="2780907108735868381">"OK"</string>
+    <string name="wallpaper_dialog_title" msgid="6395005465873616423">"Pilih kertas dinding"</string>
+    <string name="wallpaper_chooser_empty" msgid="5909737215399452696">"Tiada kertas dinding tersedia"</string>
+    <string name="wallpaper_cancel" msgid="1110492200533814461">"Batal"</string>
 </resources>
