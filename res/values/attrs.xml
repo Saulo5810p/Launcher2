@@ -55,6 +55,8 @@
         <attr name="cellWidth" format="dimension" />
         <!-- The height of a single cell -->
         <attr name="cellHeight" format="dimension" />
+        <!-- Estica as celulas para ocupar todo o espaco da pagina (celular) -->
+        <attr name="fillAvailable" format="boolean" />
         <!-- An override for the width and height gap to allow users to specify
              a specific size for the page using spacing instead of resolving the
              spacing from the width of the page -->

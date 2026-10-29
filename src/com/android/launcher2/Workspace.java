@@ -271,27 +271,19 @@ public class Workspace extends SmoothPagedView
                 R.styleable.Workspace, defStyle, 0);
 
         final Resources res = context.getResources();
-        if (LauncherApplication.isScreenLarge()) {
-            // Determine number of rows/columns dynamically
-            // TODO: This code currently fails on tablets with an aspect ratio < 1.3.
-            // Around that ratio we should make cells the same size in portrait and
-            // landscape
-            TypedArray actionBarSizeTypedArray =
-                context.obtainStyledAttributes(new int[] { android.R.attr.actionBarSize });
-            final float actionBarHeight = actionBarSizeTypedArray.getDimension(0, 0f);
-            final float systemBarHeight = res.getDimension(R.dimen.status_bar_height);
-            final float smallestScreenDim = res.getConfiguration().smallestScreenWidthDp;
-
-            cellCountX = 1;
-            while (CellLayout.widthInPortrait(res, cellCountX + 1) <= smallestScreenDim) {
-                cellCountX++;
-            }
-
-            cellCountY = 1;
-            while (actionBarHeight + CellLayout.heightInLandscape(res, cellCountY + 1)
-                <= smallestScreenDim - systemBarHeight) {
-                cellCountY++;
-            }
+        {
+            // Grade para celular, calculada em DP (o original comparava dp com pixels e dava 1x1).
+            // Mesma grade em retrato e paisagem: usa o lado menor da tela.
+            final DisplayMetrics dm = res.getDisplayMetrics();
+            final float shortDp = Math.min(dm.widthPixels, dm.heightPixels) / dm.density;
+            final float topBarDp = res.getDimension(R.dimen.qsb_bar_height) / dm.density;
+            cellCountX = Math.max(4, Math.round(shortDp / 88f));
+            // linhas: o que cabe na altura da paisagem (lado menor - status bar - barra de busca)
+            cellCountY = Math.max(4, Math.round((shortDp - 24f - topBarDp - 16f) / 76f));
+            final int cfgX = res.getInteger(R.integer.workspace_cell_count_x);
+            final int cfgY = res.getInteger(R.integer.workspace_cell_count_y);
+            if (cfgX > 0) cellCountX = cfgX;
+            if (cfgY > 0) cellCountY = cfgY;
         }
 
         mSpringLoadedShrinkFactor =
@@ -1845,8 +1837,8 @@ public class Workspace extends SmoothPagedView
     private Bitmap createExternalDragOutline(Canvas canvas, int padding) {
         Resources r = getResources();
         final int outlineColor = r.getColor(android.R.color.holo_blue_light);
-        final int iconWidth = r.getDimensionPixelSize(R.dimen.workspace_cell_width);
-        final int iconHeight = r.getDimensionPixelSize(R.dimen.workspace_cell_height);
+        final int iconWidth = CellLayout.workspaceCellWidth(r);
+        final int iconHeight = CellLayout.workspaceCellHeight(r);
         final int rectRadius = r.getDimensionPixelSize(R.dimen.external_drop_icon_rect_radius);
         final int inset = (int) (Math.min(iconWidth, iconHeight) * 0.2f);
         final Bitmap b = Bitmap.createBitmap(

@@ -935,6 +935,15 @@ public class LauncherModel extends BroadcastReceiver {
                 return true;
             }
 
+            // Item salvo fora da grade atual: ignora em vez de estourar ArrayIndexOutOfBounds
+            if (containerIndex < 0 || containerIndex >= occupied.length
+                    || item.cellX < 0 || item.cellY < 0
+                    || item.cellX + item.spanX > mCellCountX
+                    || item.cellY + item.spanY > mCellCountY) {
+                Log.e(TAG, "Item fora da grade " + mCellCountX + "x" + mCellCountY + ": " + item);
+                return false;
+            }
+
             // Check if any workspace icons overlap with each other
             for (int x = item.cellX; x < (item.cellX+item.spanX); x++) {
                 for (int y = item.cellY; y < (item.cellY+item.spanY); y++) {

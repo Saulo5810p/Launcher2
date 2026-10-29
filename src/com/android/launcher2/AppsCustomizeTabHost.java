@@ -130,6 +130,15 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
         mTabsContainer.setAlpha(0f);
     }
 
+    /** Rotacao: refaz a largura das abas a partir da nova largura do conteudo. */
+    void onConfigurationRefresh() {
+        if (mTabs != null && mTabsContainer != null) {
+            mTabs.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+            mTabsContainer.setAlpha(0f);   // reaparece quando a largura for recalculada
+            requestLayout();
+        }
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         boolean remeasureTabWidth = (mTabs.getLayoutParams().width <= 0);

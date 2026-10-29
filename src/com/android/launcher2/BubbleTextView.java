@@ -178,7 +178,7 @@ public class BubbleTextView extends TextView {
         // they set scrollX and scrollY to large values to achieve centered text
         destCanvas.save();
         destCanvas.translate(-getScrollX() + padding / 2, -getScrollY() + padding / 2);
-        destCanvas.clipRect(clipRect, Op.REPLACE);
+        destCanvas.clipRect(clipRect);   // canvas novo: INTERSECT == REPLACE (REPLACE foi removido)
         draw(destCanvas);
         destCanvas.restore();
     }

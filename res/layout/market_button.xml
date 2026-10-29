@@ -25,7 +25,7 @@
     android:text="@string/market"
     android:contentDescription="@string/market"
     android:textColor="@color/workspace_all_apps_and_delete_zone_text_color"
-    android:textSize="18sp"
+    android:textSize="15sp"
     android:shadowColor="@color/workspace_all_apps_and_delete_zone_text_shadow_color"
     android:shadowDx="0.0"
     android:shadowDy="0.0"

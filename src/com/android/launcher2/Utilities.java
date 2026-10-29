@@ -94,6 +94,89 @@ final class Utilities {
         mask.copyPixelsFromBuffer(buf);
     }
 
+
+    /** Region.Op.REPLACE foi removido (API 28+): onde nao da para ampliar o clip, mantem o atual. */
+    static void clipRectExpand(Canvas canvas, int l, int t, int r, int b) {
+        if (android.os.Build.VERSION.SDK_INT < 28) {
+            canvas.clipRect(l, t, r, b, android.graphics.Region.Op.REPLACE);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Brilho real (TableMaskFilter oculto): reflexao -> root (hidden_api_policy) -> emulacao Java
+    // ---------------------------------------------------------------------------------------
+
+    /** Avisado uma vez, quando se sabe se o TableMaskFilter real esta disponivel. */
+    interface ClipTableCallback {
+        /** @param realFilter true = TableMaskFilter real; false = brilho emulado em Java */
+        void onClipTableResolved(boolean realFilter, boolean usedRoot);
+    }
+
+    private static final String GLOW_PREFS = "launcher2_glow";
+    private static final String KEY_ROOT_TRIED = "root_hidden_api_tried";
+
+    static void resolveClipTable(final android.content.Context context, final ClipTableCallback cb) {
+        if (hasClipTable()) {
+            if (cb != null) cb.onClipTableResolved(true, false);
+            return;
+        }
+        final android.content.SharedPreferences sp =
+                context.getSharedPreferences(GLOW_PREFS, android.content.Context.MODE_PRIVATE);
+        if (sp.getBoolean(KEY_ROOT_TRIED, false)) {
+            // ja pedimos root antes (negado, sem root ou sem efeito): usa o brilho emulado
+            if (cb != null) cb.onClipTableResolved(false, false);
+            return;
+        }
+        sp.edit().putBoolean(KEY_ROOT_TRIED, true).commit();   // nunca pergunta duas vezes
+
+        final android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        new Thread(new Runnable() {
+            public void run() {
+                final boolean ok = enableHiddenApisWithRoot();
+                if (ok) {
+                    main.post(new Runnable() {
+                        public void run() {
+                            android.widget.Toast.makeText(context,
+                                    "Brilho dos icones ativado. Reiniciando o Launcher...",
+                                    android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    try { Thread.sleep(1200); } catch (InterruptedException e) { }
+                    // A politica de APIs ocultas so vale para processos novos.
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                } else {
+                    main.post(new Runnable() {
+                        public void run() {
+                            if (cb != null) cb.onClipTableResolved(false, false);
+                        }
+                    });
+                }
+            }
+        }, "Launcher2-RootGlow").start();
+    }
+
+    /** Pede root (o gerenciador de root mostra o dialogo) e libera as APIs ocultas. */
+    private static boolean enableHiddenApisWithRoot() {
+        try {
+            final Process p = Runtime.getRuntime().exec(new String[] { "su", "-c",
+                    "settings put global hidden_api_policy 1; "
+                    + "settings put global hidden_api_policy_p_apps 1; "
+                    + "settings put global hidden_api_policy_pre_p_apps 1" });
+            // espera ate 30s (tempo do usuario responder ao pedido de root)
+            for (int i = 0; i < 300; i++) {
+                try {
+                    return p.exitValue() == 0;
+                } catch (IllegalThreadStateException running) {
+                    try { Thread.sleep(100); } catch (InterruptedException e) { return false; }
+                }
+            }
+            p.destroy();
+            return false;
+        } catch (Throwable t) {
+            return false;   // sem su / sem permissao
+        }
+    }
+
     /** Android 13+ exige informar a flag de exportacao ao registrar receivers em runtime. */
     static void registerReceiverCompat(android.content.Context context,
             android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {

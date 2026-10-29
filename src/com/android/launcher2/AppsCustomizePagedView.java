@@ -363,12 +363,7 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
             Configuration.ORIENTATION_LANDSCAPE;
         int maxCellCountX = Integer.MAX_VALUE;
         int maxCellCountY = Integer.MAX_VALUE;
-        if (LauncherApplication.isScreenLarge()) {
-            maxCellCountX = (isLandscape ? LauncherModel.getCellCountX() :
-                LauncherModel.getCellCountY());
-            maxCellCountY = (isLandscape ? LauncherModel.getCellCountY() :
-                LauncherModel.getCellCountX());
-        }
+        // Celular: sem limite herdado da grade do workspace; o que cabe na tela decide.
 
         // Now that the data is ready, we can calculate the content width, the number of cells to
         // use for each page
@@ -398,6 +393,12 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
         pos[1] += (getMeasuredHeight() - mWidgetSpacingLayout.getMeasuredHeight()) / 2 + offset[1];
         mLauncher.showFirstRunAllAppsCling(pos);
 
+    }
+
+    /** Rotacao/mudanca de tamanho: recalcula colunas e linhas da gaveta. */
+    void onConfigurationRefresh() {
+        mIsDataReady = false;
+        requestLayout();
     }
 
     @Override
@@ -935,6 +936,9 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     private Bitmap getWidgetPreview(AppWidgetProviderInfo info,
             int cellHSpan, int cellVSpan, int cellWidth, int cellHeight) {
 
+        cellWidth = Math.max(1, cellWidth);
+        cellHeight = Math.max(1, cellHeight);
+
         // Load the preview image if possible
         String packageName = info.provider.getPackageName();
         Drawable drawable = null;
@@ -948,6 +952,10 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                 // Scale down the preview to something that is closer to the cellWidth/Height
                 int imageWidth = drawable.getIntrinsicWidth();
                 int imageHeight = drawable.getIntrinsicHeight();
+                if (imageWidth <= 0 || imageHeight <= 0) {
+                    imageWidth = cellWidth;
+                    imageHeight = cellHeight;
+                }
                 int bitmapWidth = imageWidth;
                 int bitmapHeight = imageHeight;
                 if (imageWidth > imageHeight) {
@@ -958,6 +966,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     bitmapWidth = (int) (imageWidth * ((float) bitmapHeight / imageHeight));
                 }
 
+                bitmapWidth = Math.max(1, bitmapWidth);
+                bitmapHeight = Math.max(1, bitmapHeight);
                 preview = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Config.ARGB_8888);
                 renderDrawableToBitmap(drawable, preview, 0, 0, bitmapWidth, bitmapHeight);
             }
@@ -995,6 +1005,8 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
                     iconScale = Math.min((float) bitmapWidth / (mAppIconSize + 2 * minOffset), 1f);
                 }
             }
+            bitmapWidth = Math.max(1, bitmapWidth);
+            bitmapHeight = Math.max(1, bitmapHeight);
             preview = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Config.ARGB_8888);
             if (cellHSpan != 1 || cellVSpan != 1) {
                 renderDrawableToBitmap(mDefaultWidgetBackground, preview, 0, 0, bitmapWidth,

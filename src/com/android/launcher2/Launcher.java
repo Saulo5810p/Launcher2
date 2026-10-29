@@ -1229,6 +1229,25 @@ public final class Launcher extends Activity
         }
     }
 
+    /** Rotacao: a Activity nao e recriada (configChanges); so re-mede e realinha. */
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mAppsCustomizeContent != null) {
+            mAppsCustomizeContent.onConfigurationRefresh();
+        }
+        if (mAppsCustomizeTabHost != null) {
+            mAppsCustomizeTabHost.onConfigurationRefresh();
+        }
+        if (mWorkspace != null) {
+            mWorkspace.post(new Runnable() {
+                public void run() {
+                    mWorkspace.setCurrentPage(mWorkspace.getCurrentPage());
+                }
+            });
+        }
+    }
+
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         // Do not call super here

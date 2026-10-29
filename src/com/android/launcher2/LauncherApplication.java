@@ -45,6 +45,15 @@ public class LauncherApplication extends Application {
             screenSize == Configuration.SCREENLAYOUT_SIZE_XLARGE;
         sScreenDensity = getResources().getDisplayMetrics().density;
 
+        // Brilho dos icones: TableMaskFilter real (reflexao/root) ou emulado em Java
+        Utilities.resolveClipTable(this, new Utilities.ClipTableCallback() {
+            public void onClipTableResolved(boolean realFilter, boolean usedRoot) {
+                android.util.Log.i("Launcher2", realFilter
+                        ? "Brilho: TableMaskFilter real"
+                        : "Brilho: efeito emulado em Java (sem TableMaskFilter)");
+            }
+        });
+
         mIconCache = new IconCache(this);
         mModel = new LauncherModel(this, mIconCache);
 

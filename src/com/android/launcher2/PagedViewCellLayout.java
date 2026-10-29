@@ -328,7 +328,7 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         // The space for a page assuming that we want to show half of a column of the previous and
         // next pages is the width - left padding (current & next page) - right padding (previous &
         // current page) - half cell width (for previous and next pages)
-        int availWidth = (int) (width - (2 * getPaddingLeft() + 2 * getPaddingRight()));
+        int availWidth = width - (getPaddingLeft() + getPaddingRight());
 
         // We know that we have to fit N cells with N-1 width gaps, so we just juggle to solve for N
         int n = Math.max(1, (availWidth + mWidthGap) / (mCellWidth + mWidthGap));

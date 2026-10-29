@@ -71,6 +71,11 @@ public class CellLayout extends ViewGroup {
     private int mOriginalHeightGap;
     private int mWidthGap;
     private int mHeightGap;
+    // Celular: estica as celulas para ocupar toda a pagina (ver fillMeasure)
+    private boolean mFillAvailable;
+    // Tamanho real (px) das celulas do workspace; usado para calcular spans de widgets
+    static int sWorkspaceCellWidth = -1;
+    static int sWorkspaceCellHeight = -1;
     private int mMaxGap;
 
     private final Rect mRect = new Rect();
@@ -174,6 +179,7 @@ public class CellLayout extends ViewGroup {
         mCountX = LauncherModel.getCellCountX();
         mCountY = LauncherModel.getCellCountY();
         mOccupied = new boolean[mCountX][mCountY];
+        mFillAvailable = a.getBoolean(R.styleable.CellLayout_fillAvailable, false);
 
         a.recycle();
 
@@ -482,8 +488,8 @@ public class CellLayout extends ViewGroup {
                     int marginX = (int) (marginFraction * (clipRect.right - clipRect.left));
                     int marginY = (int) (marginFraction * (clipRect.bottom - clipRect.top));
                     canvas.save();
-                    canvas.clipRect(-marginX, -marginY,
-                            getWidth() + marginX, getHeight() + marginY, Region.Op.REPLACE);
+                    Utilities.clipRectExpand(canvas, -marginX, -marginY,
+                            getWidth() + marginX, getHeight() + marginY);
                     modifiedClipRect = true;
                 }
 
@@ -939,6 +945,37 @@ public class CellLayout extends ViewGroup {
         return r;
     }
 
+    /** Celular: divide a area da pagina em countX x countY celulas iguais (sem gaps). */
+    private void fillMeasure(int widthSize, int heightSize) {
+        final int hSpace = Math.max(1, widthSize - getPaddingLeft() - getPaddingRight());
+        final int vSpace = Math.max(1, heightSize - getPaddingTop() - getPaddingBottom());
+        mWidthGap = 0;
+        mHeightGap = 0;
+        mCellWidth = Math.max(1, hSpace / Math.max(1, mCountX));
+        mCellHeight = Math.max(1, vSpace / Math.max(1, mCountY));
+        sWorkspaceCellWidth = mCellWidth;
+        sWorkspaceCellHeight = mCellHeight;
+        mChildren.setCellDimensions(mCellWidth, mCellHeight, 0, 0);
+
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            View child = getChildAt(i);
+            child.measure(MeasureSpec.makeMeasureSpec(hSpace, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(vSpace, MeasureSpec.EXACTLY));
+        }
+        setMeasuredDimension(widthSize, heightSize);
+    }
+
+    static int workspaceCellWidth(Resources r) {
+        return sWorkspaceCellWidth > 0 ? sWorkspaceCellWidth
+                : r.getDimensionPixelSize(R.dimen.workspace_cell_width);
+    }
+
+    static int workspaceCellHeight(Resources r) {
+        return sWorkspaceCellHeight > 0 ? sWorkspaceCellHeight
+                : r.getDimensionPixelSize(R.dimen.workspace_cell_height);
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // TODO: currently ignoring padding
@@ -951,6 +988,11 @@ public class CellLayout extends ViewGroup {
 
         if (widthSpecMode == MeasureSpec.UNSPECIFIED || heightSpecMode == MeasureSpec.UNSPECIFIED) {
             throw new RuntimeException("CellLayout cannot have UNSPECIFIED dimensions");
+        }
+
+        if (mFillAvailable) {
+            fillMeasure(widthSpecSize, heightSpecSize);
+            return;
         }
 
         int numWidthGaps = mCountX - 1;
@@ -1578,8 +1620,8 @@ public class CellLayout extends ViewGroup {
     public static int[] rectToCell(Resources resources, int width, int height, int[] result) {
         // Always assume we're working with the smallest span to make sure we
         // reserve enough space in both orientations.
-        int actualWidth = resources.getDimensionPixelSize(R.dimen.workspace_cell_width);
-        int actualHeight = resources.getDimensionPixelSize(R.dimen.workspace_cell_height);
+        int actualWidth = workspaceCellWidth(resources);
+        int actualHeight = workspaceCellHeight(resources);
         int smallerSize = Math.min(actualWidth, actualHeight);
 
         // Always round up to next largest cell
