@@ -47,6 +47,8 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
     private int mHeightGap;
     private int mMaxGap;
     protected PagedViewCellLayoutChildren mChildren;
+    // [10] camada holografica (alpha = 1 - alpha dos icones), como no Honeycomb
+    protected PagedViewCellLayoutChildren mHolographicChildren;
 
     public PagedViewCellLayout(Context context) {
         this(context, null);
@@ -77,6 +79,13 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         mChildren.setGap(mWidthGap, mHeightGap);
 
         addView(mChildren);
+
+        // [10] camada holografica
+        mHolographicChildren = new PagedViewCellLayoutChildren(context);
+        mHolographicChildren.setAlpha(0.0f);
+        mHolographicChildren.setCellDimensions(mCellWidth, mCellHeight);
+        mHolographicChildren.setGap(mWidthGap, mHeightGap);
+        addView(mHolographicChildren);
     }
 
     public int getCellWidth() {
@@ -90,17 +99,20 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
     @Override
     public void setAlpha(float alpha) {
         mChildren.setAlpha(alpha);
+        mHolographicChildren.setAlpha(1.0f - alpha); // [10]
     }
 
     void destroyHardwareLayers() {
         // called when a page is no longer visible (triggered by loadAssociatedPages ->
         // removeAllViewsOnPage)
         mChildren.destroyHardwareLayer();
+        mHolographicChildren.destroyHardwareLayer(); // [10]
     }
 
     void createHardwareLayers() {
         // called when a page is visible (triggered by loadAssociatedPages -> syncPageItems)
         mChildren.createHardwareLayer();
+        mHolographicChildren.createHardwareLayer(); // [10]
     }
 
     @Override
@@ -134,6 +146,9 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
             if (child instanceof PagedViewIcon) {
                 PagedViewIcon pagedViewIcon = (PagedViewIcon) child;
                 pagedViewIcon.disableCache();
+                // [10] contorno holografico do icone na camada de cima
+                mHolographicChildren.addView(pagedViewIcon.getHolographicOutlineView(),
+                        index, lp);
             }
             return true;
         }
@@ -143,12 +158,14 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
     @Override
     public void removeAllViewsOnPage() {
         mChildren.removeAllViews();
+        mHolographicChildren.removeAllViews(); // [10]
         destroyHardwareLayers();
     }
 
     @Override
     public void removeViewOnPageAt(int index) {
         mChildren.removeViewAt(index);
+        mHolographicChildren.removeViewAt(index); // [10]
     }
 
     @Override
@@ -204,6 +221,7 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
                     numHeightGaps > 0 ? (vFreeSpace / numHeightGaps) : 0));
 
             mChildren.setGap(mWidthGap, mHeightGap);
+            mHolographicChildren.setGap(mWidthGap, mHeightGap); // [10]
         } else {
             mWidthGap = mOriginalWidthGap;
             mHeightGap = mOriginalHeightGap;
@@ -283,11 +301,13 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
 
     public void enableCenteredContent(boolean enabled) {
         mChildren.enableCenteredContent(enabled);
+        mHolographicChildren.enableCenteredContent(enabled); // [10]
     }
 
     @Override
     protected void setChildrenDrawingCacheEnabled(boolean enabled) {
         mChildren.setChildrenDrawingCacheEnabled(enabled);
+        mHolographicChildren.setChildrenDrawingCacheEnabled(enabled); // [10]
     }
 
     public void setCellCount(int xCount, int yCount) {
@@ -300,6 +320,7 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         mWidthGap = widthGap;
         mHeightGap = heightGap;
         mChildren.setGap(widthGap, heightGap);
+        mHolographicChildren.setGap(widthGap, heightGap); // [10]
     }
 
     public int[] getCellCountForDimensions(int width, int height) {

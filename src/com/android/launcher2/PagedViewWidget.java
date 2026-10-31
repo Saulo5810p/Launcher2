@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -54,6 +55,9 @@ public class PagedViewWidget extends LinearLayout implements Checkable {
     private String mDimensionsFormatString;
 
     private int mAlpha = 255;
+    // [10] cores do contorno holografico
+    private int mHoloBlurColor = 0xFF6B8CF0;
+    private int mHoloOutlineColor = 0xFF8CD2FF;
     private int mHolographicAlpha;
 
     private boolean mIsChecked;
@@ -84,6 +88,14 @@ public class PagedViewWidget extends LinearLayout implements Checkable {
                 r.getInteger(R.integer.config_dragAppsCustomizeIconFadeOutDuration);
         }
         mDimensionsFormatString = r.getString(R.string.widget_dims_format);
+
+        // [10]
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PagedViewWidget,
+                defStyle, 0);
+        mHoloBlurColor = a.getColor(R.styleable.PagedViewWidget_blurColor, mHoloBlurColor);
+        mHoloOutlineColor = a.getColor(R.styleable.PagedViewWidget_outlineColor,
+                mHoloOutlineColor);
+        a.recycle();
 
         setWillNotDraw(false);
         setClipToPadding(false);
@@ -139,6 +151,20 @@ public class PagedViewWidget extends LinearLayout implements Checkable {
         final ImageView image = (ImageView) findViewById(R.id.widget_preview);
         if (preview != null) {
             image.setImageDrawable(preview);
+            // [10] contorno holografico do preview (copia: o original pode ser reciclado)
+            final Bitmap previewBitmap = preview.getBitmap();
+            if (previewBitmap != null && !previewBitmap.isRecycled()) {
+                final Bitmap copy = previewBitmap.copy(Bitmap.Config.ARGB_8888, false);
+                if (copy != null) {
+                    HolographicOutlineWorker.request(copy, null, mHoloBlurColor,
+                            mHoloOutlineColor, new HolographicOutlineWorker.Callback() {
+                                @Override
+                                public void onOutline(Bitmap outline) {
+                                    setHolographicOutline(outline);
+                                }
+                            });
+                }
+            }
             image.setScaleType(scale ? ImageView.ScaleType.FIT_START : ImageView.ScaleType.MATRIX);
             image.setAlpha(0f);
             image.animate()

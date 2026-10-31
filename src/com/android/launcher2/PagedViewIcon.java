@@ -50,6 +50,9 @@ public class PagedViewIcon extends CachedTextView implements Checkable {
     private Bitmap mIcon;
 
     private int mAlpha = 255;
+    // [10] cores do contorno holografico (blurColor / outlineColor do XML)
+    private int mHoloBlurColor;
+    private int mHoloOutlineColor;
     private int mHolographicAlpha;
 
     private boolean mIsChecked;
@@ -84,6 +87,13 @@ public class PagedViewIcon extends CachedTextView implements Checkable {
         }
 
         mHolographicOutlineView = new HolographicPagedViewIcon(context, this);
+
+        // [10]
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PagedViewIcon,
+                defStyle, 0);
+        mHoloBlurColor = a.getColor(R.styleable.PagedViewIcon_blurColor, 0xFF6B8CF0);
+        mHoloOutlineColor = a.getColor(R.styleable.PagedViewIcon_outlineColor, 0xFF8CD2FF);
+        a.recycle();
     }
 
     protected HolographicPagedViewIcon getHolographicOutlineView() {
@@ -101,6 +111,24 @@ public class PagedViewIcon extends CachedTextView implements Checkable {
         setCompoundDrawablesWithIntrinsicBounds(null, new FastBitmapDrawable(mIcon), null, null);
         setText(info.title);
         setTag(info);
+
+        // [10] contorno holografico (cache + thread de fundo)
+        final Bitmap iconSrc = mIcon;
+        final String key = (info.componentName != null
+                ? info.componentName.flattenToString() : String.valueOf(info.title))
+                + "#" + System.identityHashCode(iconSrc);
+        Bitmap cached = HolographicOutlineWorker.getCached(key);
+        if (cached != null) {
+            setHolographicOutline(cached);
+        } else if (iconSrc != null) {
+            HolographicOutlineWorker.request(iconSrc, key, mHoloBlurColor, mHoloOutlineColor,
+                    new HolographicOutlineWorker.Callback() {
+                        @Override
+                        public void onOutline(Bitmap outline) {
+                            if (mIcon == iconSrc) setHolographicOutline(outline);
+                        }
+                    });
+        }
     }
 
     public void setHolographicOutline(Bitmap holoOutline) {

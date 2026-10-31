@@ -70,6 +70,16 @@ public class PagedViewGridLayout extends GridLayout implements Page {
         return result;
     }
 
+    // [10] o alpha da pagina vai para cada widget (PagedViewWidget.setAlpha separa em
+    // alpha do widget + alpha do contorno holografico, como o PagedViewCellLayout)
+    @Override
+    public void setAlpha(float alpha) {
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            getChildAt(i).setAlpha(alpha);
+        }
+    }
+
     void destroyHardwareLayer() {
         setLayerType(LAYER_TYPE_NONE, null);
     }
