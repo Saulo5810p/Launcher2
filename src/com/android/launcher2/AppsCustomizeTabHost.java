@@ -141,13 +141,13 @@ public class AppsCustomizeTabHost extends TabHost implements LauncherTransitiona
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        boolean remeasureTabWidth = (mTabs.getLayoutParams().width <= 0);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         // Set the width of the tab list to the content width
-        if (remeasureTabWidth) {
+        // [08] refeito a cada mudanca da largura do conteudo (rotacao), nao so na 1a vez
+        {
             int contentWidth = mAppsCustomizePane.getPageContentWidth();
-            if (contentWidth > 0) {
+            if (contentWidth > 0 && mTabs.getLayoutParams().width != contentWidth) {
                 // Set the width and show the tab bar (if we have a loading graphic, we can switch
                 // it off here)
                 mTabs.getLayoutParams().width = contentWidth;

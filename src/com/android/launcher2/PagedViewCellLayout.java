@@ -197,8 +197,11 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
             int vSpace = heightSpecSize - getPaddingTop() - getPaddingBottom();
             int hFreeSpace = hSpace - (mCellCountX * mOriginalCellWidth);
             int vFreeSpace = vSpace - (mCellCountY * mOriginalCellHeight);
-            mWidthGap = Math.min(mMaxGap, numWidthGaps > 0 ? (hFreeSpace / numWidthGaps) : 0);
-            mHeightGap = Math.min(mMaxGap,numHeightGaps > 0 ? (vFreeSpace / numHeightGaps) : 0);
+            // [08] gap negativo = celulas sobrepostas; nunca abaixo de 0
+            mWidthGap = Math.max(0, Math.min(mMaxGap,
+                    numWidthGaps > 0 ? (hFreeSpace / numWidthGaps) : 0));
+            mHeightGap = Math.max(0, Math.min(mMaxGap,
+                    numHeightGaps > 0 ? (vFreeSpace / numHeightGaps) : 0));
 
             mChildren.setGap(mWidthGap, mHeightGap);
         } else {

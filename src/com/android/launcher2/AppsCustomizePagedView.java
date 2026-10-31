@@ -203,6 +203,9 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
     // Dimens
     private int mContentWidth;
+    // [08] tamanho com que a grade (colunas/linhas/widgets) foi calculada pela ultima vez
+    private int mReadyWidth = -1;
+    private int mReadyHeight = -1;
     private int mAppIconSize;
     private int mWidgetCountX, mWidgetCountY;
     private int mWidgetWidthGap, mWidgetHeightGap;
@@ -367,6 +370,14 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
 
         // Now that the data is ready, we can calculate the content width, the number of cells to
         // use for each page
+        // [08] widgetCountX/Y dependem da orientacao (values-land): relê a cada calculo
+        mWidgetCountX = Math.max(1,
+                getResources().getInteger(R.integer.apps_customize_widget_cell_count_x));
+        mWidgetCountY = Math.max(1,
+                getResources().getInteger(R.integer.apps_customize_widget_cell_count_y));
+        mReadyWidth = width;
+        mReadyHeight = height;
+
         mWidgetSpacingLayout.setGap(mPageLayoutWidthGap, mPageLayoutHeightGap);
         mWidgetSpacingLayout.setPadding(mPageLayoutPaddingLeft, mPageLayoutPaddingTop,
                 mPageLayoutPaddingRight, mPageLayoutPaddingBottom);
@@ -405,6 +416,14 @@ public class AppsCustomizePagedView extends PagedViewWithDraggableItems implemen
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
+        // [08] O tamanho mudou desde que a grade foi calculada (rotacao): refaz a grade
+        // com o tamanho NOVO, voltando para a mesma pagina.
+        if (isDataReady() && width > 0 && height > 0 && mReadyWidth > 0
+                && (width != mReadyWidth || height != mReadyHeight)) {
+            int keep = getSaveInstanceStateIndex();
+            if (keep >= 0) mSaveInstanceStateItemIndex = keep;
+            mIsDataReady = false;
+        }
         if (!isDataReady()) {
             if (testDataReady()) {
                 setDataIsReady();
