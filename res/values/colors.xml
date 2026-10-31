@@ -30,4 +30,10 @@
     <color name="workspace_all_apps_and_delete_zone_text_shadow_color">#A0000000</color>
     <!-- Fundo da gaveta de apps: wallpaper visivel com escurecimento (estilo Honeycomb) -->
     <color name="apps_customize_bg_color">#B3080808</color>
+    <!-- [09] cores do Launcher2 Honeycomb -->
+    <color name="drag_outline_color">#ff6595f9</color>
+    <color name="workspace_item_pressed_outline_color">#ff6595f9</color>
+    <color name="workspace_item_pressed_glow_color">#ff0997ff</color>
+    <color name="workspace_item_focused_outline_color">#ff6595f9</color>
+    <color name="workspace_item_focused_glow_color">#ff0997ff</color>
 </resources>

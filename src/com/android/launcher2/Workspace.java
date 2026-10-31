@@ -1759,7 +1759,7 @@ public class Workspace extends SmoothPagedView
      * Responsibility for the bitmap is transferred to the caller.
      */
     public Bitmap createDragBitmap(View v, Canvas canvas, int padding) {
-        final int outlineColor = getResources().getColor(android.R.color.holo_blue_light);
+        final int outlineColor = getResources().getColor(R.color.drag_outline_color);
         Bitmap b;
 
         if (v instanceof TextView) {
@@ -1785,7 +1785,7 @@ public class Workspace extends SmoothPagedView
      * Responsibility for the bitmap is transferred to the caller.
      */
     private Bitmap createDragOutline(View v, Canvas canvas, int padding) {
-        final int outlineColor = getResources().getColor(android.R.color.holo_blue_light);
+        final int outlineColor = getResources().getColor(R.color.drag_outline_color);
         final Bitmap b = Bitmap.createBitmap(
                 v.getWidth() + padding, v.getHeight() + padding, Bitmap.Config.ARGB_8888);
 
@@ -1805,7 +1805,7 @@ public class Workspace extends SmoothPagedView
     }
     private Bitmap createDragOutline(Bitmap orig, Canvas canvas, int padding, int w, int h,
             Paint alphaClipPaint) {
-        final int outlineColor = getResources().getColor(android.R.color.holo_blue_light);
+        final int outlineColor = getResources().getColor(R.color.drag_outline_color);
         final Bitmap b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         canvas.setBitmap(b);
 
@@ -1836,7 +1836,7 @@ public class Workspace extends SmoothPagedView
      */
     private Bitmap createExternalDragOutline(Canvas canvas, int padding) {
         Resources r = getResources();
-        final int outlineColor = r.getColor(android.R.color.holo_blue_light);
+        final int outlineColor = r.getColor(R.color.drag_outline_color);
         final int iconWidth = CellLayout.workspaceCellWidth(r);
         final int iconHeight = CellLayout.workspaceCellHeight(r);
         final int rectRadius = r.getDimensionPixelSize(R.dimen.external_drop_icon_rect_radius);

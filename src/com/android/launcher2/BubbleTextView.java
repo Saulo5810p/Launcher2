@@ -90,8 +90,11 @@ public class BubbleTextView extends TextView {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setColor(bubbleColor);
         mBubbleColorAlpha = Color.alpha(bubbleColor) / 255.0f;
-        mFocusedOutlineColor = mFocusedGlowColor = mPressedOutlineColor = mPressedGlowColor =
-            res.getColor(android.R.color.holo_blue_light);
+        // [09] cores do Honeycomb (em vez de holo_blue_light)
+        mFocusedOutlineColor = res.getColor(R.color.workspace_item_focused_outline_color);
+        mFocusedGlowColor = res.getColor(R.color.workspace_item_focused_glow_color);
+        mPressedOutlineColor = res.getColor(R.color.workspace_item_pressed_outline_color);
+        mPressedGlowColor = res.getColor(R.color.workspace_item_pressed_glow_color);
 
         setShadowLayer(SHADOW_LARGE_RADIUS, 0.0f, SHADOW_Y_OFFSET, SHADOW_LARGE_COLOUR);
     }

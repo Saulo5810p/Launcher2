@@ -23,6 +23,8 @@ import android.graphics.Canvas;
 import android.graphics.drawable.StateListDrawable;
 import android.view.View;
 
+import com.android.launcher.R;
+
 public class HolographicViewHelper {
 
     private final HolographicOutlineHelper mOutlineHelper = new HolographicOutlineHelper();
@@ -33,7 +35,7 @@ public class HolographicViewHelper {
 
     public HolographicViewHelper(Context context) {
         Resources res = context.getResources();
-        mHighlightColor = res.getColor(android.R.color.holo_blue_light);
+        mHighlightColor = res.getColor(R.color.workspace_item_pressed_outline_color);
     }
 
     /**
