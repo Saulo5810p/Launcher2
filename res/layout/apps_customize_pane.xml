@@ -16,7 +16,7 @@
 <com.android.launcher2.AppsCustomizeTabHost
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:launcher="http://schemas.android.com/apk/res-auto"
-    android:background="@color/apps_customize_bg_color">
+    android:background="@drawable/all_apps_bg_gradient">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"

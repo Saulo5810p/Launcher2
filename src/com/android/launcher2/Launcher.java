@@ -2222,7 +2222,8 @@ public final class Launcher extends Activity
     }
 
     void updateWallpaperVisibility(boolean visible) {
-        int wpflags = visible ? WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER : 0;
+        // Gaveta translucida (Honeycomb): o wallpaper nunca pode ser desligado.
+        int wpflags = WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         int curflags = getWindow().getAttributes().flags
                 & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         if (wpflags != curflags) {

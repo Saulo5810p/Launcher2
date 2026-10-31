@@ -135,10 +135,12 @@ edit(RES / "layout/workspace_screen.xml",
      'launcher:fillAvailable="true"\n    launcher:cellWidth="@dimen/workspace_cell_width"',
      marker="fillAvailable", desc="workspace_screen fillAvailable")
 
-edit(RES / "layout/apps_customize_pane.xml",
-     'android:background="#FF000000">',
-     'android:background="@color/apps_customize_bg_color">',
-     marker="apps_customize_bg_color", desc="gaveta translucida")
+_pane = RES / "layout/apps_customize_pane.xml"
+if not (_pane.exists() and "all_apps_bg_gradient" in rd(_pane)):   # o 07 usa o gradiente do Honeycomb
+    edit(_pane,
+         'android:background="#FF000000">',
+         'android:background="@color/apps_customize_bg_color">',
+         marker="apps_customize_bg_color", desc="gaveta translucida")
 
 # abas / botao Comprar com tamanho de celular
 p = RES / "values/styles.xml"
