@@ -55,17 +55,7 @@
         android:layout_gravity="bottom"
         android:visibility="gone" />
 
-    <ImageView
-        android:id="@+id/customize_add_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|right"
-        android:padding="16dp"
-        android:src="@drawable/ic_home_add_holo_dark"
-        android:contentDescription="@string/widgets_tab_label"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true" />
+    <!-- [11b] o botao + agora fica em search_bar.xml, ao lado do botao de todos os apps -->
 
     <include layout="@layout/workspace_cling"
         android:id="@+id/workspace_cling"

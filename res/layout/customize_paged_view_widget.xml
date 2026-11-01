@@ -1,48 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- [11] Item de widget/papel de parede da gaveta (igual ao do Honeycomb). -->
+<!-- [11] Item de widget/papel de parede da gaveta (Honeycomb). [11b] textos e margens
+     reduzidos: o preview ocupa o espaco que sobra (antes ficava com altura zero). -->
 <com.android.launcher2.PagedViewWidget
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:launcher="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:paddingRight="25dp"
-    android:paddingBottom="50dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="6dp"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:layout_weight="1.0"
     launcher:blurColor="#ff6b8cf0"
     launcher:outlineColor="#ff8cd2ff">
     <ImageView
         android:id="@+id/widget_preview"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1.0"
         android:scaleType="fitStart"
-        android:adjustViewBounds="true"
-        android:layout_weight="1.0" />
+        android:adjustViewBounds="true" />
     <ImageView
         android:id="@+id/customize_divider"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/widget_divider"
-        android:layout_weight="0.0" />
+        android:src="@drawable/widget_divider" />
     <TextView
         android:id="@+id/widget_name"
-        android:textSize="20sp"
+        android:textSize="13sp"
         android:textColor="#ffffffff"
         android:gravity="left"
-        android:fadingEdge="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxLines="2"
+        android:maxWidth="160dp"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:shadowColor="#ff000000"
         android:shadowDx="0.0"
         android:shadowDy="1.0"
-        android:shadowRadius="1.0"
-        android:layout_weight="0.0" />
+        android:shadowRadius="1.0" />
     <TextView
         android:id="@+id/widget_dims"
-        android:textSize="20sp"
+        android:textSize="12sp"
         android:textColor="#ff999999"
         android:gravity="left"
         android:layout_width="wrap_content"
@@ -50,6 +49,5 @@
         android:shadowColor="#99000000"
         android:shadowDx="0.0"
         android:shadowDy="1.0"
-        android:shadowRadius="1.0"
-        android:layout_weight="0.0" />
+        android:shadowRadius="1.0" />
 </com.android.launcher2.PagedViewWidget>

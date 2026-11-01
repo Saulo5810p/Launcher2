@@ -88,6 +88,16 @@ public class PagedViewCellLayout extends ViewGroup implements Page {
         addView(mHolographicChildren);
     }
 
+    /** [11b] tamanho de celula ajustavel (gaveta de personalizacao). */
+    void setCellSize(int width, int height) {
+        if (width == mCellWidth && height == mCellHeight) return;
+        mOriginalCellWidth = mCellWidth = width;
+        mOriginalCellHeight = mCellHeight = height;
+        mChildren.setCellDimensions(width, height);
+        mHolographicChildren.setCellDimensions(width, height);
+        requestLayout();
+    }
+
     public int getCellWidth() {
         return mCellWidth;
     }

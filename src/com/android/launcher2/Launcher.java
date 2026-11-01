@@ -2453,6 +2453,15 @@ public final class Launcher extends Activity
         TextView tabView = (TextView) getLayoutInflater().inflate(
                 R.layout.tab_widget_indicator, tabWidget, false);
         tabView.setText(getString(labelRes));
+        // [11b] sem caixa alta/negrito e com ate 2 linhas (o texto quebrava letra por letra)
+        final float density = getResources().getDisplayMetrics().density;
+        tabView.setAllCaps(false);
+        tabView.setTypeface(android.graphics.Typeface.DEFAULT);
+        tabView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15);
+        tabView.setMaxLines(2);
+        tabView.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        tabView.setPadding((int) (6 * density), (int) (8 * density),
+                (int) (6 * density), (int) (10 * density));
         tabView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
                 0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
         mCustomizeTray.addTab(mCustomizeTray.newTabSpec(tag).setIndicator(tabView)
@@ -2488,8 +2497,14 @@ public final class Launcher extends Activity
         android.widget.TabWidget tabWidget = (android.widget.TabWidget)
                 mCustomizeTray.findViewById(android.R.id.tabs);
         // a faixa de abas ocupa ~60% da largura (como no Honeycomb)
-        ViewGroup.LayoutParams tlp = tabWidget.getLayoutParams();
-        tlp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.6f);
+        // [11b] retrato: toda a largura; paisagem: faixa central (12% de folga de cada lado)
+        android.widget.LinearLayout.LayoutParams tlp =
+                (android.widget.LinearLayout.LayoutParams) tabWidget.getLayoutParams();
+        android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+        int tabMargin = dm.widthPixels > dm.heightPixels ? (int) (dm.widthPixels * 0.12f) : 0;
+        tlp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        tlp.leftMargin = tabMargin;
+        tlp.rightMargin = tabMargin;
         tabWidget.setLayoutParams(tlp);
 
         addCustomizeTab(tabWidget, factory, CUSTOMIZE_WIDGETS_TAG, R.string.widgets_tab_label);
@@ -2653,6 +2668,16 @@ public final class Launcher extends Activity
             hideHotseat(true);
             mState = State.CUSTOMIZE;
         }
+    }
+
+    /** [11b] Tocar numa pagina encolhida abre essa pagina (Honeycomb: onWorkspaceClick). */
+    void onCustomizePageClicked(CellLayout layout) {
+        if (mState != State.CUSTOMIZE) return;
+        int index = mWorkspace.indexOfChild(layout);
+        if (index >= 0) {
+            mWorkspace.setCurrentPage(index);
+        }
+        showWorkspace(true);
     }
 
     void exitCustomizeSpringLoadedDragModeDelayed(boolean successfulDrop) {

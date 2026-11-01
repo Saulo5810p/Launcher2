@@ -76,6 +76,14 @@ public class CustomizePagedView extends PagedViewWithDraggableItems
     private int mMaxWidgetsCellHSpan;
     private int mMaxWidgetWidth;
     private int mMinPageWidth;
+    // [11b] grade adaptativa: o numero de colunas/linhas e o tamanho da celula dependem do
+    // espaco real da bandeja (o A35 tem ~384dp de altura, bem menos que um Xoom)
+    private int mMaxCellCountX;
+    private int mMaxCellCountY;
+    private int mCellW = -1;
+    private int mCellH = -1;
+    private int mGridW = -1;
+    private int mGridH = -1;
 
     /** Pagina de widgets/papeis de parede: LinearLayout que tambem e' uma Page do PagedView. */
     static class TrayPage extends LinearLayout implements Page {
@@ -130,6 +138,8 @@ public class CustomizePagedView extends PagedViewWithDraggableItems
         mCellCountX = a.getInt(R.styleable.PagedView_cellCountX, 7);
         mCellCountY = a.getInt(R.styleable.PagedView_cellCountY, 4);
         a.recycle();
+        mMaxCellCountX = mCellCountX;
+        mMaxCellCountY = mCellCountY;
 
         mWorkspaceWidgetLayout = new PagedViewCellLayout(context);
         mInflater = LayoutInflater.from(context);
@@ -137,6 +147,45 @@ public class CustomizePagedView extends PagedViewWithDraggableItems
         setSoundEffectsEnabled(false);
         setupWorkspaceLayout();
         setDataIsReady();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int w = MeasureSpec.getSize(widthMeasureSpec);
+        final int h = MeasureSpec.getSize(heightMeasureSpec);
+        if (w > 0 && h > 0 && (w != mGridW || h != mGridH)) {
+            mGridW = w;
+            mGridH = h;
+            updateGrid(w, h);
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    /** Calcula colunas, linhas e tamanho de celula que cabem no espaco da bandeja. */
+    private void updateGrid(int w, int h) {
+        final float d = getResources().getDisplayMetrics().density;
+        final int gapW = Math.max(0, mPageLayoutWidthGap);
+        final int gapH = Math.max(0, mPageLayoutHeightGap);
+        final int availH = h - mPageLayoutPaddingTop - mPageLayoutPaddingBottom;
+        final int availW = w - mPageLayoutPaddingLeft - mPageLayoutPaddingRight;
+        final int maxCellH = (int) (96 * d);
+        final int minCellH = (int) (72 * d);
+        int rows = Math.max(1, Math.min(mMaxCellCountY, (availH + gapH) / (minCellH + gapH)));
+        int cellH = Math.max(1, Math.min(maxCellH, (availH - gapH * (rows - 1)) / rows));
+        int cellW = cellH * 80 / 96;
+        int cols = Math.max(1, Math.min(mMaxCellCountX, (availW + gapW) / (cellW + gapW)));
+        if (cols != mCellCountX || rows != mCellCountY || cellW != mCellW || cellH != mCellH) {
+            mCellCountX = cols;
+            mCellCountY = rows;
+            mCellW = cellW;
+            mCellH = cellH;
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    invalidatePageData();
+                }
+            });
+        }
     }
 
     @Override
@@ -558,6 +607,7 @@ public class CustomizePagedView extends PagedViewWithDraggableItems
 
     private void setupPage(PagedViewCellLayout layout) {
         layout.setCellCount(mCellCountX, mCellCountY);
+        if (mCellW > 0 && mCellH > 0) layout.setCellSize(mCellW, mCellH);
         layout.setPadding(mPageLayoutPaddingLeft, mPageLayoutPaddingTop,
                 mPageLayoutPaddingRight, mPageLayoutPaddingBottom);
         layout.setGap(mPageLayoutWidthGap, mPageLayoutHeightGap);

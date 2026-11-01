@@ -387,6 +387,15 @@ public class Workspace extends SmoothPagedView
         }
         CellLayout cl = ((CellLayout) child);
         cl.setOnInterceptTouchListener(this);
+        cl.setOnClickListener(new OnClickListener() { // [11b] toque na pagina encolhida
+            @Override
+            public void onClick(View v) {
+                if (mState == State.CUSTOMIZE) {
+                    mLauncher.onCustomizePageClicked((CellLayout) v);
+                }
+            }
+        });
+        cl.setClickable(false); // [11b] so fica clicavel com a gaveta aberta (changeState)
         cl.setClickable(true);
         cl.enableHardwareLayers();
     }
@@ -532,7 +541,8 @@ public class Workspace extends SmoothPagedView
 
         // Only allow tap to next page on large devices, where there's significant margin outside
         // the active workspace
-        return LauncherApplication.isScreenLarge() && hitsPage(current - 1, x, y);
+        return mState != State.CUSTOMIZE && LauncherApplication.isScreenLarge()
+                && hitsPage(current - 1, x, y); // [11b] na gaveta o toque abre a pagina
     }
 
     @Override
@@ -543,7 +553,8 @@ public class Workspace extends SmoothPagedView
 
         // Only allow tap to next page on large devices, where there's significant margin outside
         // the active workspace
-        return LauncherApplication.isScreenLarge() && hitsPage(current + 1, x, y);
+        return mState != State.CUSTOMIZE && LauncherApplication.isScreenLarge()
+                && hitsPage(current + 1, x, y); // [11b] na gaveta o toque abre a pagina
     }
 
     /**
@@ -1572,6 +1583,9 @@ public class Workspace extends SmoothPagedView
         }
 
         if (state == State.CUSTOMIZE) finalBackgroundAlpha = 1.0f; // [11] caixas das paginas
+        for (int c = 0; c < getChildCount(); c++) { // [11b] paginas clicaveis so na gaveta
+            getChildAt(c).setClickable(state == State.CUSTOMIZE);
+        }
         float translationX = 0;
         float translationY = 0;
 
@@ -1620,7 +1634,8 @@ public class Workspace extends SmoothPagedView
             float pageTranslationY = translationY;
             if (state == State.CUSTOMIZE) {
                 rotation = (mCurrentPage - i) * WORKSPACE_ROTATION;
-                translationX = 0f;
+                // [11b] afastamento extra: as paginas giradas se sobrepunham
+                translationX = (i - mCurrentPage) * 0.16f * finalScaleFactor * cl.getWidth();
                 float cos = (float) Math.cos(Math.toRadians(rotation));
                 pageScaleX = finalScaleFactor / (cos == 0f ? 1f : cos);
                 int dist = Math.abs(i - mCurrentPage);
@@ -2880,6 +2895,26 @@ public class Workspace extends SmoothPagedView
         if (info instanceof PendingAddItemInfo) {
             final PendingAddItemInfo pendingInfo = (PendingAddItemInfo) dragInfo;
 
+            if (d == null || touchXY == null) {
+                // [11b] clique na gaveta (sem arrasto): primeiro espaco livre, sem animacao de voo
+                cellLayout.findCellForSpan(mTargetCell, spanX, spanY);
+                switch (pendingInfo.itemType) {
+                case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET:
+                    mLauncher.addAppWidgetFromDrop((PendingAddWidgetInfo) pendingInfo,
+                            container, screen, mTargetCell, null);
+                    break;
+                case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
+                    mLauncher.processShortcutFromDrop(pendingInfo.componentName,
+                            container, screen, mTargetCell, null);
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown item type: " +
+                            pendingInfo.itemType);
+                }
+                cellLayout.onDragExit();
+                return;
+            }
+
             boolean findNearestVacantCell = true;
             if (pendingInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT) {
                 mTargetCell = findNearestArea((int) touchXY[0], (int) touchXY[1], spanX, spanY,
@@ -2991,7 +3026,7 @@ public class Workspace extends SmoothPagedView
             LauncherModel.addOrMoveItemInDatabase(mLauncher, info, container, screen,
                     lp.cellX, lp.cellY);
 
-            if (d.dragView != null) {
+            if (d != null && d.dragView != null) {
                 // We wrap the animation call in the temporary set and reset of the current
                 // cellLayout to its final transform -- this means we animate the drag view to
                 // the correct final location.
