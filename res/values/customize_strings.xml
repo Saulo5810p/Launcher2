@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- [11] Abas da gaveta de personalizacao (textos do Launcher2 Honeycomb). -->
+    <string name="applications_tab_label">App shortcuts</string>
+    <string name="wallpapers_tab_label">Wallpapers</string>
+    <string name="shortcuts_tab_label">More</string>
+</resources>

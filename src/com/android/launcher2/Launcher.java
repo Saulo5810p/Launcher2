@@ -155,7 +155,8 @@ public final class Launcher extends Activity
     private static final String TOOLBAR_ICON_METADATA_NAME = "com.android.launcher.toolbar_icon";
 
     /** The different states that Launcher can be in. */
-    private enum State { WORKSPACE, APPS_CUSTOMIZE, APPS_CUSTOMIZE_SPRING_LOADED };
+    private enum State { WORKSPACE, APPS_CUSTOMIZE, APPS_CUSTOMIZE_SPRING_LOADED,
+            CUSTOMIZE, CUSTOMIZE_SPRING_LOADED };
     private State mState = State.WORKSPACE;
     private AnimatorSet mStateAnimation;
 
@@ -768,6 +769,7 @@ public final class Launcher extends Activity
         mAppsCustomizeContent = (AppsCustomizePagedView)
                 mAppsCustomizeTabHost.findViewById(R.id.apps_customize_pane_content);
         mAppsCustomizeContent.setup(this, dragController);
+        setupCustomizeTray(dragController); // [11]
 
         // Get the all apps button
         mAllAppsButton = findViewById(R.id.all_apps_button);
@@ -1437,8 +1439,7 @@ public final class Launcher extends Activity
     }
 
     private void addItems() {
-        showWorkspace(true);
-        showAddDialog();
+        toggleCustomizeDrawer(); // [11] gaveta de personalizacao no lugar do dialogo
     }
 
     private void resetAddInfo() {
@@ -1691,7 +1692,7 @@ public final class Launcher extends Activity
 
     @Override
     public void onBackPressed() {
-        if (mState == State.APPS_CUSTOMIZE) {
+        if (mState == State.APPS_CUSTOMIZE || mState == State.CUSTOMIZE) { // [11]
             showWorkspace(true);
         } else if (mWorkspace.getOpenFolder() != null) {
             Folder openFolder = mWorkspace.getOpenFolder();
@@ -2036,7 +2037,7 @@ public final class Launcher extends Activity
                 // User long pressed on empty space
                 mWorkspace.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                         HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
-                startWallpaper();
+                showCustomizeDrawer(true); // [11] toque longo abre a gaveta (nao o papel de parede)
             } else {
                 if (!(itemUnderLongClick instanceof Folder)) {
                     // User long pressed on an item
@@ -2420,6 +2421,251 @@ public final class Launcher extends Activity
         }
     }
 
+    // ------------------------------------------------------------------------------------
+    // [11] Gaveta de personalizacao (Honeycomb): paginas encolhidas no topo + bandeja com as
+    // abas Widgets / Atalhos de aplicativo / Papeis de parede / Mais.
+    // Aberta pelo botao "+" e pelo toque longo no espaco vazio.
+    // ------------------------------------------------------------------------------------
+    private static final String CUSTOMIZE_WIDGETS_TAG = "customize_widgets";
+    private static final String CUSTOMIZE_APPLICATIONS_TAG = "customize_applications";
+    private static final String CUSTOMIZE_WALLPAPERS_TAG = "customize_wallpapers";
+    private static final String CUSTOMIZE_SHORTCUTS_TAG = "customize_shortcuts";
+
+    private CustomizeTrayTabHost mCustomizeTray;
+    private CustomizePagedView mCustomizePagedView;
+    private View mCustomizeTrayBg;
+    private View mCustomizeAddButton;
+    private AnimatorSet mCustomizeAnimation;
+
+    private CustomizePagedView.CustomizationType getCustomizeFilterForTabTag(String tag) {
+        if (CUSTOMIZE_APPLICATIONS_TAG.equals(tag)) {
+            return CustomizePagedView.CustomizationType.ApplicationCustomization;
+        } else if (CUSTOMIZE_WALLPAPERS_TAG.equals(tag)) {
+            return CustomizePagedView.CustomizationType.WallpaperCustomization;
+        } else if (CUSTOMIZE_SHORTCUTS_TAG.equals(tag)) {
+            return CustomizePagedView.CustomizationType.ShortcutCustomization;
+        }
+        return CustomizePagedView.CustomizationType.WidgetCustomization;
+    }
+
+    private void addCustomizeTab(android.widget.TabWidget tabWidget,
+            android.widget.TabHost.TabContentFactory factory, String tag, int labelRes) {
+        TextView tabView = (TextView) getLayoutInflater().inflate(
+                R.layout.tab_widget_indicator, tabWidget, false);
+        tabView.setText(getString(labelRes));
+        tabView.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
+        mCustomizeTray.addTab(mCustomizeTray.newTabSpec(tag).setIndicator(tabView)
+                .setContent(factory));
+    }
+
+    private void setupCustomizeTray(DragController dragController) {
+        mCustomizeTray = (CustomizeTrayTabHost) mDragLayer.findViewById(R.id.customization_drawer);
+        mCustomizeTrayBg = mDragLayer.findViewById(R.id.customization_drawer_bg);
+        mCustomizeAddButton = mDragLayer.findViewById(R.id.customize_add_button);
+        if (mCustomizeAddButton != null) {
+            mCustomizeAddButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toggleCustomizeDrawer();
+                }
+            });
+        }
+        if (mCustomizeTray == null) return;
+
+        mCustomizeTray.setup();
+        mCustomizePagedView = (CustomizePagedView) getLayoutInflater().inflate(
+                R.layout.customization_drawer_tab_contents, mCustomizeTray, false);
+        mCustomizePagedView.setup(this, dragController);
+
+        final android.widget.TabHost.TabContentFactory factory =
+                new android.widget.TabHost.TabContentFactory() {
+                    @Override
+                    public View createTabContent(String tag) {
+                        return mCustomizePagedView;
+                    }
+                };
+        android.widget.TabWidget tabWidget = (android.widget.TabWidget)
+                mCustomizeTray.findViewById(android.R.id.tabs);
+        // a faixa de abas ocupa ~60% da largura (como no Honeycomb)
+        ViewGroup.LayoutParams tlp = tabWidget.getLayoutParams();
+        tlp.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.6f);
+        tabWidget.setLayoutParams(tlp);
+
+        addCustomizeTab(tabWidget, factory, CUSTOMIZE_WIDGETS_TAG, R.string.widgets_tab_label);
+        addCustomizeTab(tabWidget, factory, CUSTOMIZE_APPLICATIONS_TAG,
+                R.string.applications_tab_label);
+        addCustomizeTab(tabWidget, factory, CUSTOMIZE_WALLPAPERS_TAG,
+                R.string.wallpapers_tab_label);
+        addCustomizeTab(tabWidget, factory, CUSTOMIZE_SHORTCUTS_TAG, R.string.shortcuts_tab_label);
+
+        mCustomizeTray.setOnTabChangedListener(new android.widget.TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                final CustomizePagedView.CustomizationType newType =
+                        getCustomizeFilterForTabTag(tabId);
+                if (newType == mCustomizePagedView.getCustomizationFilter()) return;
+                final int duration = 150;
+                android.animation.ObjectAnimator out = android.animation.ObjectAnimator.ofFloat(
+                        mCustomizePagedView, "alpha", mCustomizePagedView.getAlpha(), 0f);
+                out.setDuration(duration);
+                out.addListener(new android.animation.AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(android.animation.Animator animation) {
+                        mCustomizePagedView.setCustomizationFilter(newType);
+                        android.animation.ObjectAnimator in =
+                                android.animation.ObjectAnimator.ofFloat(mCustomizePagedView,
+                                        "alpha", mCustomizePagedView.getAlpha(), 1f);
+                        in.setDuration(duration);
+                        in.start();
+                    }
+                });
+                out.start();
+            }
+        });
+        mCustomizePagedView.update();
+    }
+
+    int getCustomizeTrayHeight() {
+        int w = mDragLayer != null ? mDragLayer.getWidth() : 0;
+        int h = mDragLayer != null ? mDragLayer.getHeight() : 0;
+        if (w == 0 || h == 0) {
+            w = getResources().getDisplayMetrics().widthPixels;
+            h = getResources().getDisplayMetrics().heightPixels;
+        }
+        return CustomizeTrayTabHost.trayHeightFor(w, h);
+    }
+
+    public boolean isCustomizeOpen() {
+        return mState == State.CUSTOMIZE;
+    }
+
+    void toggleCustomizeDrawer() {
+        if (mState == State.CUSTOMIZE) {
+            showWorkspace(true);
+        } else {
+            showCustomizeDrawer(true);
+        }
+    }
+
+    void showCustomizeDrawer(boolean animated) {
+        if (mCustomizeTray == null || mState != State.WORKSPACE || isWorkspaceLocked()) return;
+        mState = State.CUSTOMIZE;
+        mWorkspace.changeState(Workspace.State.CUSTOMIZE, animated);
+        mSearchDropTargetBar.hideSearchBar(animated);
+        hideHotseat(animated);
+        updateWallpaperVisibility(true);
+        showCustomizeTray(animated);
+    }
+
+    void hideCustomizeDrawer(boolean animated) {
+        hideCustomizeTray(animated);
+        mSearchDropTargetBar.showSearchBar(animated);
+        showHotseat(animated);
+    }
+
+    private void showCustomizeTray(boolean animated) {
+        if (mCustomizeAnimation != null) mCustomizeAnimation.cancel();
+        mCustomizeTray.setVisibility(View.VISIBLE);
+        if (mCustomizeTrayBg != null) mCustomizeTrayBg.setVisibility(View.VISIBLE);
+        final float h = getCustomizeTrayHeight();
+        if (animated) {
+            mCustomizeTray.setAlpha(0f);
+            mCustomizeTray.setTranslationY(h / 2f);
+            if (mCustomizeTrayBg != null) mCustomizeTrayBg.setAlpha(0f);
+            mCustomizeAnimation = new AnimatorSet();
+            android.animation.ObjectAnimator ty = android.animation.ObjectAnimator.ofFloat(
+                    mCustomizeTray, "translationY", h / 2f, 0f);
+            android.animation.ObjectAnimator ta = android.animation.ObjectAnimator.ofFloat(
+                    mCustomizeTray, "alpha", 0f, 1f);
+            if (mCustomizeTrayBg != null) {
+                android.animation.ObjectAnimator ba = android.animation.ObjectAnimator.ofFloat(
+                        mCustomizeTrayBg, "alpha", 0f, 1f);
+                mCustomizeAnimation.playTogether(ty, ta, ba);
+            } else {
+                mCustomizeAnimation.playTogether(ty, ta);
+            }
+            mCustomizeAnimation.setDuration(450);
+            mCustomizeAnimation.setInterpolator(new DecelerateInterpolator(1.8f));
+            mCustomizeAnimation.start();
+        } else {
+            mCustomizeTray.setAlpha(1f);
+            mCustomizeTray.setTranslationY(0f);
+            if (mCustomizeTrayBg != null) mCustomizeTrayBg.setAlpha(1f);
+        }
+    }
+
+    private void hideCustomizeTray(boolean animated) {
+        if (mCustomizeTray == null) return;
+        if (mCustomizeAnimation != null) mCustomizeAnimation.cancel();
+        final float h = getCustomizeTrayHeight();
+        if (animated && mCustomizeTray.getVisibility() == View.VISIBLE) {
+            mCustomizeAnimation = new AnimatorSet();
+            android.animation.ObjectAnimator ty = android.animation.ObjectAnimator.ofFloat(
+                    mCustomizeTray, "translationY", mCustomizeTray.getTranslationY(), h / 2f);
+            android.animation.ObjectAnimator ta = android.animation.ObjectAnimator.ofFloat(
+                    mCustomizeTray, "alpha", mCustomizeTray.getAlpha(), 0f);
+            if (mCustomizeTrayBg != null) {
+                android.animation.ObjectAnimator ba = android.animation.ObjectAnimator.ofFloat(
+                        mCustomizeTrayBg, "alpha", mCustomizeTrayBg.getAlpha(), 0f);
+                mCustomizeAnimation.playTogether(ty, ta, ba);
+            } else {
+                mCustomizeAnimation.playTogether(ty, ta);
+            }
+            mCustomizeAnimation.setDuration(350);
+            mCustomizeAnimation.setInterpolator(new AccelerateInterpolator(1.2f));
+            mCustomizeAnimation.addListener(new android.animation.AnimatorListenerAdapter() {
+                private boolean mCancelled = false;
+
+                @Override
+                public void onAnimationCancel(android.animation.Animator animation) {
+                    mCancelled = true;
+                }
+
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    if (mCancelled) return;
+                    mCustomizeTray.setVisibility(View.GONE);
+                    if (mCustomizeTrayBg != null) mCustomizeTrayBg.setVisibility(View.GONE);
+                }
+            });
+            mCustomizeAnimation.start();
+        } else {
+            mCustomizeTray.setVisibility(View.GONE);
+            if (mCustomizeTrayBg != null) mCustomizeTrayBg.setVisibility(View.GONE);
+        }
+    }
+
+    /** Arrasto iniciado na gaveta: ela some e a workspace fica em modo spring loaded. */
+    void enterCustomizeSpringLoadedDragMode() {
+        if (mState == State.CUSTOMIZE) {
+            mWorkspace.changeState(Workspace.State.SPRING_LOADED);
+            hideCustomizeTray(true);
+            showHotseat(true);
+            mState = State.CUSTOMIZE_SPRING_LOADED;
+        }
+    }
+
+    void exitCustomizeSpringLoadedDragMode() {
+        if (mState == State.CUSTOMIZE_SPRING_LOADED) {
+            mWorkspace.changeState(Workspace.State.CUSTOMIZE);
+            showCustomizeTray(true);
+            hideHotseat(true);
+            mState = State.CUSTOMIZE;
+        }
+    }
+
+    void exitCustomizeSpringLoadedDragModeDelayed(boolean successfulDrop) {
+        if (mState != State.CUSTOMIZE_SPRING_LOADED) return;
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                exitCustomizeSpringLoadedDragMode();
+            }
+        }, successfulDrop ? EXIT_SPRINGLOADED_MODE_LONG_TIMEOUT
+                : EXIT_SPRINGLOADED_MODE_SHORT_TIMEOUT);
+    }
+
     void showWorkspace(boolean animated) {
         Resources res = getResources();
         int stagger = res.getInteger(R.integer.config_appsCustomizeWorkspaceAnimationStagger);
@@ -2427,6 +2673,9 @@ public final class Launcher extends Activity
         mWorkspace.changeState(Workspace.State.NORMAL, animated, stagger);
         if (mState == State.APPS_CUSTOMIZE) {
             closeAllApps(animated);
+        }
+        if (mState == State.CUSTOMIZE || mState == State.CUSTOMIZE_SPRING_LOADED) { // [11]
+            hideCustomizeDrawer(animated);
         }
 
         mWorkspace.showDockDivider(!animated);
@@ -3088,6 +3337,7 @@ public final class Launcher extends Activity
                 if (mAppsCustomizeContent != null) {
                     mAppsCustomizeContent.setApps(apps);
                 }
+                if (mCustomizePagedView != null) mCustomizePagedView.setApps(apps); // [11]
             }
         });
     }
@@ -3104,6 +3354,7 @@ public final class Launcher extends Activity
         if (mAppsCustomizeContent != null) {
             mAppsCustomizeContent.addApps(apps);
         }
+        if (mCustomizePagedView != null) mCustomizePagedView.addApps(apps); // [11]
     }
 
     /**
@@ -3121,6 +3372,7 @@ public final class Launcher extends Activity
         if (mAppsCustomizeContent != null) {
             mAppsCustomizeContent.updateApps(apps);
         }
+        if (mCustomizePagedView != null) mCustomizePagedView.updateApps(apps); // [11]
     }
 
     /**
@@ -3137,6 +3389,7 @@ public final class Launcher extends Activity
         if (mAppsCustomizeContent != null) {
             mAppsCustomizeContent.removeApps(apps);
         }
+        if (mCustomizePagedView != null) mCustomizePagedView.removeApps(apps); // [11]
 
         // Notify the drag controller
         mDragController.onAppsRemoved(apps, this);
@@ -3149,6 +3402,7 @@ public final class Launcher extends Activity
         if (mAppsCustomizeContent != null) {
             mAppsCustomizeContent.onPackagesUpdated();
         }
+        if (mCustomizePagedView != null) mCustomizePagedView.update(); // [11]
     }
 
     private int mapConfigurationOriActivityInfoOri(int configOri) {

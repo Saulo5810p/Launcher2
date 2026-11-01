@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- [11] Item de widget/papel de parede da gaveta (igual ao do Honeycomb). -->
+<com.android.launcher2.PagedViewWidget
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:launcher="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:paddingRight="25dp"
+    android:paddingBottom="50dp"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_weight="1.0"
+    launcher:blurColor="#ff6b8cf0"
+    launcher:outlineColor="#ff8cd2ff">
+    <ImageView
+        android:id="@+id/widget_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitStart"
+        android:adjustViewBounds="true"
+        android:layout_weight="1.0" />
+    <ImageView
+        android:id="@+id/customize_divider"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/widget_divider"
+        android:layout_weight="0.0" />
+    <TextView
+        android:id="@+id/widget_name"
+        android:textSize="20sp"
+        android:textColor="#ffffffff"
+        android:gravity="left"
+        android:fadingEdge="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="2"
+        android:shadowColor="#ff000000"
+        android:shadowDx="0.0"
+        android:shadowDy="1.0"
+        android:shadowRadius="1.0"
+        android:layout_weight="0.0" />
+    <TextView
+        android:id="@+id/widget_dims"
+        android:textSize="20sp"
+        android:textColor="#ff999999"
+        android:gravity="left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:shadowColor="#99000000"
+        android:shadowDx="0.0"
+        android:shadowDy="1.0"
+        android:shadowRadius="1.0"
+        android:layout_weight="0.0" />
+</com.android.launcher2.PagedViewWidget>

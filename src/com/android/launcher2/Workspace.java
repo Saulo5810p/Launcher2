@@ -83,6 +83,8 @@ public class Workspace extends SmoothPagedView
 
     // Y rotation to apply to the workspace screens
     private static final float WORKSPACE_ROTATION = 12.5f;
+    // [11] escala das paginas no topo da gaveta de personalizacao (SHRINK_FACTOR do Honeycomb)
+    private static final float CUSTOMIZE_SHRINK_FACTOR = 0.16f;
     private static final float WORKSPACE_OVERSCROLL_ROTATION = 24f;
     private static float CAMERA_DISTANCE = 6500;
 
@@ -154,7 +156,7 @@ public class Workspace extends SmoothPagedView
     // State variable that indicates whether the pages are small (ie when you're
     // in all apps or customize mode)
 
-    enum State { NORMAL, SPRING_LOADED, SMALL };
+    enum State { NORMAL, SPRING_LOADED, SMALL, CUSTOMIZE };
     private State mState = State.NORMAL;
     private boolean mIsSwitchingState = false;
     private boolean mSwitchStateAfterFirstLayout = false;
@@ -1310,7 +1312,8 @@ public class Workspace extends SmoothPagedView
     }
 
     public boolean isSmall() {
-        return mState == State.SMALL || mState == State.SPRING_LOADED;
+        return mState == State.SMALL || mState == State.SPRING_LOADED
+                || mState == State.CUSTOMIZE;
     }
 
     void enableChildrenCache(int fromPage, int toPage) {
@@ -1550,7 +1553,9 @@ public class Workspace extends SmoothPagedView
 
         if (state != State.NORMAL) {
             finalScaleFactor = mSpringLoadedShrinkFactor - (state == State.SMALL ? 0.1f : 0);
-            if (oldState == State.NORMAL && state == State.SMALL) {
+            if (state == State.CUSTOMIZE) finalScaleFactor = CUSTOMIZE_SHRINK_FACTOR; // [11]
+            if (oldState == State.NORMAL
+                    && (state == State.SMALL || state == State.CUSTOMIZE)) {
                 zoomIn = false;
                 if (animated) {
                     hideScrollingIndicator(true);
@@ -1566,6 +1571,7 @@ public class Workspace extends SmoothPagedView
             normalState = true;
         }
 
+        if (state == State.CUSTOMIZE) finalBackgroundAlpha = 1.0f; // [11] caixas das paginas
         float translationX = 0;
         float translationY = 0;
 
@@ -1607,6 +1613,23 @@ public class Workspace extends SmoothPagedView
                 translationX = getOffsetXForRotation(rotation, cl.getWidth(), cl.getHeight());
             }
 
+            // [11] Honeycomb (TOP): pagina no topo, girada em Y (quanto mais longe da atual,
+            // mais girada) e com a escala X/Y compensada pela rotacao
+            float pageScaleX = finalScaleFactor;
+            float pageScaleY = finalScaleFactor;
+            float pageTranslationY = translationY;
+            if (state == State.CUSTOMIZE) {
+                rotation = (mCurrentPage - i) * WORKSPACE_ROTATION;
+                translationX = 0f;
+                float cos = (float) Math.cos(Math.toRadians(rotation));
+                pageScaleX = finalScaleFactor / (cos == 0f ? 1f : cos);
+                int dist = Math.abs(i - mCurrentPage);
+                pageScaleY = finalScaleFactor * (dist == 0 ? 0.972f : (dist == 1 ? 1.0f : 1.1f));
+                float scaledH = finalScaleFactor * cl.getHeight();
+                float topY = ((getHeight() - mLauncher.getCustomizeTrayHeight()) - scaledH) / 2f;
+                pageTranslationY = topY - (cl.getHeight() - scaledH) / 2f - cl.getTop();
+            }
+
             mOldAlphas[i] = cl.getAlpha();
             mNewAlphas[i] = finalAlphaValue;
             if (animated) {
@@ -1619,17 +1642,17 @@ public class Workspace extends SmoothPagedView
                 mOldRotationYs[i] = cl.getRotationY();
 
                 mNewTranslationXs[i] = translationX;
-                mNewTranslationYs[i] = translationY;
-                mNewScaleXs[i] = finalScaleFactor;
-                mNewScaleYs[i] = finalScaleFactor;
+                mNewTranslationYs[i] = pageTranslationY;
+                mNewScaleXs[i] = pageScaleX;
+                mNewScaleYs[i] = pageScaleY;
                 mNewBackgroundAlphas[i] = finalBackgroundAlpha;
                 mNewBackgroundAlphaMultipliers[i] = finalAlphaMultiplierValue;
                 mNewRotationYs[i] = rotation;
             } else {
                 cl.setTranslationX(translationX);
-                cl.setTranslationY(translationY);
-                cl.setScaleX(finalScaleFactor);
-                cl.setScaleY(finalScaleFactor);
+                cl.setTranslationY(pageTranslationY);
+                cl.setScaleX(pageScaleX);
+                cl.setScaleY(pageScaleY);
                 cl.setBackgroundAlpha(0.0f);
                 cl.setBackgroundAlphaMultiplier(finalAlphaMultiplierValue);
                 cl.setAlpha(finalAlphaValue);

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- [11] Paisagem: mesma grade do Honeycomb (8x3). -->
+<com.android.launcher2.CustomizePagedView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:launcher="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    launcher:cellCountX="8"
+    launcher:cellCountY="3"
+    launcher:pageLayoutWidthGap="32dp"
+    launcher:pageLayoutHeightGap="12dp"
+    launcher:pageLayoutPaddingTop="12dp"
+    launcher:pageLayoutPaddingBottom="8dp"
+    launcher:pageLayoutPaddingLeft="20dp"
+    launcher:pageLayoutPaddingRight="20dp"
+    launcher:wallpaperCellSpanX="3"
+    launcher:wallpaperCellCountX="12"
+    launcher:widgetCellCountX="14" />

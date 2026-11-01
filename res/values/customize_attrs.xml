@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- [11] Atributos da gaveta de personalizacao (Honeycomb). -->
+    <declare-styleable name="CustomizePagedView">
+        <attr name="wallpaperCellSpanX" format="integer" />
+        <attr name="wallpaperCellCountX" format="integer" />
+        <attr name="widgetCellCountX" format="integer" />
+    </declare-styleable>
+</resources>
